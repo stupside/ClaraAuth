@@ -5,8 +5,8 @@ project(AuthLib)
 
 ##### UNCOMMENT
 
-#include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-#conan_basic_setup(TARGETS)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
 
 ##### UNCOMMENT
 
