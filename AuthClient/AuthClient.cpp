@@ -2,7 +2,7 @@
 //
 
 #include "AuthLib.h"
-#include "response.h"
+
 #include <iostream>
 
 int main()
@@ -11,8 +11,8 @@ int main()
     string Key = "870FD2C6-060D-499C-BE1E-FDD7E486266E";
 
     Response Response;
-    Auth.ProcessKey(Response, Key);
-    if (Response.Error.m_succeed) {
+    
+    if (Auth.ProcessKey(Response, Key)) {
         cout << Response.LicenseKey.m_key << endl;
         cout << "Auth Succeed." << endl;
     }

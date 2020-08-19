@@ -1,4 +1,3 @@
-#pragma once
 #ifndef RESPONSE_H
 #define RESPONSE_H
 
@@ -49,7 +48,6 @@ public:
 #pragma endregion
 
 class Response {
-    friend class Auth;
 private:
 public:
     ~Response();

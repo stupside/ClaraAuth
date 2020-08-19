@@ -4,16 +4,8 @@
 #include <iostream>
 using namespace std;
 
-class Client {
-private:
-    void SetHwid();
-public:
-    Client();
-    ~Client();
-
-    Client(string hwid);
-public:
-    string m_hwid;
+namespace Client {
+    string GetHwid();
 };
 
 #endif

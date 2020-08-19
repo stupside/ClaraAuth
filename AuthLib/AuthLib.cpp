@@ -12,7 +12,13 @@
 #define AUTH_AUDIENCE ((string) "Clara")
 #define AUTH_EXPIRY ((int) 15)
 
+#include <exception>
+#include <stdexcept>
+#include <iostream>
+
 #include "AuthLib.h"
+
+#include "client.h"
 
 #include "md5.h"
 #include "hotp.h"
@@ -39,9 +45,10 @@ void Auth::GetSignature() {
 }
 
 string Auth::BuildToken() {
-	json object;
-	object["client"]["hwid"] = Client.m_hwid;
 
+	json object;
+	object["client"]["hwid"] = Client::GetHwid();
+	
 	auto datasB64encoded = cppcodec::base64_rfc4648::encode(object.dump()); // This way if we add an encryption method, it will be easier.
 
 	GetSignature();
@@ -85,7 +92,7 @@ bool Auth::VerifyToken(string Token) {
 	return true;
 }
 
-void Auth::ProcessKey(Response& response, string Key) {
+bool Auth::ProcessKey(Response& response, string Key) {
 	cpr::AsyncResponse  fr = cpr::GetAsync(
 		cpr::Url{ AUTH_ENDPOINT },
 		cpr::Header{ { "accept", "application/json"} },
@@ -102,29 +109,29 @@ void Auth::ProcessKey(Response& response, string Key) {
 
 	if (req.status_code == 429) {
 		response.Error = Error(req.text, false);
-		return;
+		return false;
 	}
 
 	if (req.status_code != 200) {
 		response.Error = Error("Auth is offline. (ERROR: " + req.status_code + ')', false);
-		return;
+		return false;
 	}
 
 	json json = json::parse(req.text.c_str());
 
 	if (json["fail"] != nullptr) {
 		response.Error = Error((string)json["fail"], false);
-		return;
+		return false;
 	};
 
 	if (json["token"] == nullptr) {
 		response.Error = Error("Invalid Token.", false);
-		return;
+		return false;
 	}
 
 	if (!VerifyToken(json["token"])) {
 		response.Error = Error("Invalid Token.", false);
-		return;
+		return false;
 	}
 
 	auto decoded = jwt::decode(json["token"]);
@@ -140,10 +147,10 @@ void Auth::ProcessKey(Response& response, string Key) {
 		response.Product = Wrapper.ProductToObject(datas["product"]);
 		response.Package = Wrapper.PackageToObject(datas["package"]);
 		response.LicenseKey = Wrapper.LicenseKeyToObject(datas["licensekey"]);
-		return;
+		return true;
 	}
 
 
 	response.Error = Error("Invalid Token.", false);
-	return;
+	return false;
 }

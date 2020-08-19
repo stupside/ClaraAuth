@@ -1,4 +1,5 @@
 #include "response.h"
+
 #pragma region Classes
 #pragma region LicenseKey
 LicenseKey::LicenseKey(string const& key, string const& expiry)
