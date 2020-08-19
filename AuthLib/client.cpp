@@ -2,17 +2,12 @@
 
 #include "md5.h"
 
-#include <cppcodec/base64_rfc4648.hpp>
-#include <cppcodec/base32_rfc4648.hpp>
-#include <nlohmann/json.hpp>
-#include <jwt-cpp/jwt.h>
-#include <cpr/cpr.h>
+#include <windows.h>
 #include <sddl.h>
 #include <iostream>
-#include <nlohmann/json.hpp>
 
+#include <vector>
 #include <string>
-using nlohmann::json;
 
 Client::Client() {
 	SetHwid();

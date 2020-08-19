@@ -53,6 +53,7 @@ class Response {
 private:
 public:
     ~Response();
+
     Error Error;
     Product Product;
     Package Package;

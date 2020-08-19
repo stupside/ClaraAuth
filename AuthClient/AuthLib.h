@@ -1,8 +1,15 @@
 #ifndef AUTH_H
 #define AUTH_H
 
-#include "response.h"
 #include "client.h"
+#include "response.h"
+
+using namespace std;
+
+#define AUTH_ENDPOINT ((string) "http://api.tenet.ooo/api/LicenseKey/Process")
+#define AUTH_ISSUER ((string) "Clara_Client")
+#define AUTH_AUDIENCE ((string) "Clara")
+#define AUTH_EXPIRY ((int) 15)
 
 class Auth
 {

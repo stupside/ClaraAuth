@@ -1,11 +1,26 @@
 // AuthClient.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
+#include "AuthLib.h"
+#include "response.h"
 #include <iostream>
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    Auth Auth("49aecb7244d24fd387ca19ca1c03caa0");
+    string Key = "870FD2C6-060D-499C-BE1E-FDD7E486266E";
+
+    Response Response;
+    Auth.ProcessKey(Response, Key);
+    if (Response.Error.m_succeed) {
+        cout << Response.LicenseKey.m_key << endl;
+        cout << "Auth Succeed." << endl;
+    }
+    else
+    {
+        cout << Response.Error.m_error << endl;
+        cout << "Auth Failed." << endl;
+    }
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu

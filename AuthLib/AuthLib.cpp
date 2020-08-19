@@ -1,3 +1,17 @@
+#ifdef APSTUDIO_INVOKED
+#ifndef APSTUDIO_READONLY_SYMBOLS
+#define _APS_NEXT_RESOURCE_VALUE        101
+#define _APS_NEXT_COMMAND_VALUE         40001
+#define _APS_NEXT_CONTROL_VALUE         1001
+#define _APS_NEXT_SYMED_VALUE           101
+#endif
+#endif
+
+#define AUTH_ENDPOINT ((string) "http://api.tenet.ooo/api/LicenseKey/Process")
+#define AUTH_ISSUER ((string) "Clara_Client")
+#define AUTH_AUDIENCE ((string) "Clara")
+#define AUTH_EXPIRY ((int) 15)
+
 #include "AuthLib.h"
 
 #include "md5.h"
