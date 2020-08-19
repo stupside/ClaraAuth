@@ -8,10 +8,10 @@
 int main()
 {
     Auth Auth("49aecb7244d24fd387ca19ca1c03caa0");
-    string Key = "870FD2C6-060D-499C-BE1E-FDD7E486266E";
 
-    Response Response;
+    string Key = "870FD2C6-060D-499C-BE1E-FDD7E486266E";
     
+    Response Response;
     if (Auth.ProcessKey(Response, Key)) {
         cout << Response.LicenseKey.m_key << endl;
         cout << "Auth Succeed." << endl;

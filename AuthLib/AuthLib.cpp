@@ -12,10 +12,6 @@
 #define AUTH_AUDIENCE ((string) "Clara")
 #define AUTH_EXPIRY ((int) 15)
 
-#include <exception>
-#include <stdexcept>
-#include <iostream>
-
 #include "AuthLib.h"
 
 #include "client.h"
@@ -38,7 +34,7 @@ Auth::~Auth(void) {
 	cout << "\nAuth reseted.\n" << endl;
 }
 
-void Auth::GetSignature() {
+void Auth::SetSignature() {
 	auto b32 = cppcodec::base32_rfc4648::encode(m_product_code);
 	auto otp = totp(Bytes::fromBase32(b32), time(nullptr), 0, AUTH_EXPIRY, 6);
 	m_signature = md5(to_string(otp) + m_product_code);
@@ -51,7 +47,7 @@ string Auth::BuildToken() {
 	
 	auto datasB64encoded = cppcodec::base64_rfc4648::encode(object.dump()); // This way if we add an encryption method, it will be easier.
 
-	GetSignature();
+	SetSignature();
 
 	return jwt::create()
 		.set_audience(AUTH_AUDIENCE).set_issuer(AUTH_ISSUER).set_type("JWS")

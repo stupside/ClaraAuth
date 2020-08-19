@@ -161,7 +161,6 @@
     <ClInclude Include="client.h" />
     <ClInclude Include="hotp.h" />
     <ClInclude Include="md5.h" />
-    <ClInclude Include="resource.h" />
     <ClInclude Include="response.h" />
     <ClInclude Include="wrapper.h" />
   </ItemGroup>
