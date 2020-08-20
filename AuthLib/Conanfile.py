@@ -20,11 +20,3 @@ class TenetAuth(ConanFile):
     # If using OpenSSL, we need it to be active in libcurl too
     def configure(self):
         self.options["libcurl"].with_openssl = True
-
-    def build(self):
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
-
-    def package_info(self):
-        self.cpp_info.libs = ["AuthLib"]

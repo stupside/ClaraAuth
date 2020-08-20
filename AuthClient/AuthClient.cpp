@@ -2,18 +2,17 @@
 //
 
 #include "AuthLib.h"
-
 #include <iostream>
 
 int main()
 {
-    Auth Auth("49aecb7244d24fd387ca19ca1c03caa0");
+    Auth Auth("a1b094f6d27a4e46b33b076fd2ad7cb4");
 
-    string Key = "870FD2C6-060D-499C-BE1E-FDD7E486266E";
+    string Key = "C458F372-BCFB-4BDB-9BE1-63BC6525E671";
     
     Response Response;
     if (Auth.ProcessKey(Response, Key)) {
-        cout << Response.LicenseKey.m_key << endl;
+        cout << Response.LicenseKey.m_expiry << endl;
         cout << "Auth Succeed." << endl;
     }
     else
