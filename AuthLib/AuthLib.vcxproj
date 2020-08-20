@@ -70,6 +70,7 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\x64\Release\.conan\conanbuildinfo.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -133,7 +134,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>LIB.exe /OUT:$(OutputPath)\Auth.lib $(OutputPath)\$(ProjectName).lib $(Conan-openssl-Root)\lib\libssld.lib $(Conan-openssl-Root)\lib\libcryptod.lib $(Conan-zlib-Root)\lib\zlib.lib $(Conan-cpr-Root)\lib\cpr.lib $(Conan-libcurl-Root)\lib\libcurl.lib $(Conan-cryptopp-Root)\lib\cryptopp-static.lib</Command>
+      <Command>LIB.exe /OUT:$(OutputPath)\Auth.lib $(OutputPath)\$(ProjectName).lib $(Conan-openssl-Root)\lib\libssld.lib $(Conan-openssl-Root)\lib\libcryptod.lib $(Conan-zlib-Root)\lib\zlib.lib $(Conan-cpr-Root)\lib\cpr.lib $(Conan-libcurl-Root)\lib\libcurl.lib $(Conan-cryptopp-Root)\lib\cryptopp-static.lib ws2_32.lib crypt32.lib</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -144,7 +145,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
@@ -154,6 +155,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>LIB.exe /OUT:$(OutputPath)\Auth.lib $(OutputPath)\$(ProjectName).lib $(Conan-openssl-Root)\lib\libssld.lib $(Conan-openssl-Root)\lib\libcryptod.lib $(Conan-zlib-Root)\lib\zlib.lib $(Conan-cpr-Root)\lib\cpr.lib $(Conan-libcurl-Root)\lib\libcurl.lib $(Conan-cryptopp-Root)\lib\cryptopp-static.lib ws2_32.lib crypt32.lib</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AuthLib.h" />
