@@ -54,5 +54,7 @@ string Client::GetHwid() {
 	}
 
 	string psz_sid_str(psz_sid);
-	return md5(psz_sid_str);
+
+	string hwid = md5(psz_sid_str);
+	return hwid;
 }
