@@ -50,7 +50,7 @@ public:
 class Response {
 private:
 public:
-    ~Response();
+    ~Response(void);
     Error Error;
     Product Product;
     Package Package;

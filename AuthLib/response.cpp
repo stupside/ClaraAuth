@@ -22,4 +22,4 @@ Error::Error(string const& error, bool succeed)
 #pragma endregion
 #pragma endregion
 
-Response::~Response() {}
+Response::~Response(void) {}

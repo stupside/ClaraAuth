@@ -1,6 +1,3 @@
-#ifndef RESPONSE_H
-#define RESPONSE_H
-
 #include <string>
 using namespace std;
 
@@ -50,11 +47,9 @@ public:
 class Response {
 private:
 public:
-    ~Response();
+    ~Response(void);
     Error Error;
     Product Product;
     Package Package;
     LicenseKey LicenseKey;
 };
-
-#endif

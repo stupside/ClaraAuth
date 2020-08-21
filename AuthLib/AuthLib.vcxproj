@@ -134,7 +134,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>LIB.exe /OUT:$(OutputPath)\Auth.lib $(OutputPath)\$(ProjectName).lib $(Conan-openssl-Root)\lib\libssld.lib $(Conan-openssl-Root)\lib\libcryptod.lib $(Conan-zlib-Root)\lib\zlib.lib $(Conan-cpr-Root)\lib\cpr.lib $(Conan-libcurl-Root)\lib\libcurl.lib $(Conan-cryptopp-Root)\lib\cryptopp-static.lib ws2_32.lib crypt32.lib</Command>
+      <Command>LIB.exe /OUT:$(OutputPath)\Auth.lib Ws2_32.lib crypt32.lib $(OutputPath)\$(ProjectName).lib $(Conan-openssl-Root)\lib\libssld.lib $(Conan-openssl-Root)\lib\libcryptod.lib $(Conan-zlib-Root)\lib\zlib.lib $(Conan-cpr-Root)\lib\cpr.lib $(Conan-libcurl-Root)\lib\libcurl.lib $(Conan-cryptopp-Root)\lib\cryptopp-static.lib ws2_32.lib crypt32.lib</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -156,7 +156,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>LIB.exe /OUT:$(OutputPath)\Auth.lib $(OutputPath)\$(ProjectName).lib $(Conan-openssl-Root)\lib\libssld.lib $(Conan-openssl-Root)\lib\libcryptod.lib $(Conan-zlib-Root)\lib\zlib.lib $(Conan-cpr-Root)\lib\cpr.lib $(Conan-libcurl-Root)\lib\libcurl.lib $(Conan-cryptopp-Root)\lib\cryptopp-static.lib ws2_32.lib crypt32.lib</Command>
+      <Command>LIB.exe /OUT:$(OutputPath)\Auth.lib $(OutputPath)\$(ProjectName).lib $(Conan-openssl-Root)\lib\libssl.lib $(Conan-openssl-Root)\lib\libcrypto.lib $(Conan-zlib-Root)\lib\zlib.lib $(Conan-cpr-Root)\lib\cpr.lib $(Conan-libcurl-Root)\lib\libcurl.lib $(Conan-cryptopp-Root)\lib\cryptopp-static.lib ws2_32.lib crypt32.lib</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

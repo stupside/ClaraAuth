@@ -1,6 +1,3 @@
-#ifndef AUTH_H
-#define AUTH_H
-
 #include "response.h"
 
 class Auth
@@ -18,9 +15,7 @@ private:
 public:
 
 	Auth(string product_code) : m_product_code(product_code) { }
-	~Auth();
+	~Auth(void);
 
 	bool ProcessKey(Response& response, string Key);
 };
-
-#endif
