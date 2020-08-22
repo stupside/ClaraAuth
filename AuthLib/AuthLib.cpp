@@ -8,6 +8,7 @@
 #endif
 
 #define AUTH_ENDPOINT ((string) "http://api.tenet.ooo/api/LicenseKey/Process")
+//define AUTH_ENDPOINT ((string) "http://localhost:56494/api/LicenseKey/Process")
 #define AUTH_ISSUER ((string) "Clara_Client")
 #define AUTH_AUDIENCE ((string) "Clara")
 #define AUTH_EXPIRY ((int) 15)

@@ -2,24 +2,31 @@
 //
 
 #include "AuthLib.h"
+
+#include <Windows.h>
 #include <iostream>
 
 int main()
 {
-    Auth Auth("a1b094f6d27a4e46b33b076fd2ad7cb4");
+    Auth Auth("1e8156d0f654457984e51ec3ccf496de");
 
-    string Key = "C458F372-BCFB-4BDB-9BE1-63BC6525E671";
-    
+    string Key;
+    cout << "Enter a key: ";
+    cin >> Key;
+
     Response Response;
     if (Auth.ProcessKey(Response, Key)) {
-        cout << Response.LicenseKey.m_expiry << endl;
-        cout << "Auth Succeed." << endl;
+        cout << "------------ Auth Succeed ------------" << endl;
+        cout << "Expiry: " << Response.LicenseKey.m_expiry << endl;
+        cout << "Product: " << Response.Product.m_name << endl;
+        cout << "Package: " << Response.Package.m_name << endl;
     }
     else
     {
-        cout << Response.Error.m_error << endl;
-        cout << "Auth Failed." << endl;
+        cout << "------------ Auth Failed ------------" << endl;
+        cout << "Error: " << Response.Error.m_error << endl;
     }
+    Sleep(30000);
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
