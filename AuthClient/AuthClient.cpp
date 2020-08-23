@@ -6,16 +6,20 @@
 #include <Windows.h>
 #include <iostream>
 
+#define PRODUCT_CODE ("39065a3c301d470590a8dd2b5a6dcafd")
+
 int main()
 {
-    Auth Auth("1e8156d0f654457984e51ec3ccf496de");
+    Auth Auth(PRODUCT_CODE);
 
     string Key;
     cout << "Enter a key: ";
     cin >> Key;
 
     Response Response;
-    if (Auth.ProcessKey(Response, Key)) {
+    bool AuthSucceed = Auth.ProcessKey(Response, Key);
+
+    if (AuthSucceed) {
         cout << "------------ Auth Succeed ------------" << endl;
         cout << "Expiry: " << Response.LicenseKey.m_expiry << endl;
         cout << "Product: " << Response.Product.m_name << endl;

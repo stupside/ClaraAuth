@@ -8,9 +8,9 @@
 #endif
 
 #define AUTH_ENDPOINT ((string) "http://api.tenet.ooo/api/LicenseKey/Process")
-//define AUTH_ENDPOINT ((string) "http://localhost:56494/api/LicenseKey/Process")
-#define AUTH_ISSUER ((string) "Clara_Client")
-#define AUTH_AUDIENCE ((string) "Clara")
+//#define AUTH_ENDPOINT ((string) "http://localhost:56494/api/LicenseKey/Test")
+#define AUTH_ISSUER ((string) "Tenet_Client")
+#define AUTH_AUDIENCE ((string) "Tenet")
 #define AUTH_EXPIRY ((int) 15)
 
 #include "AuthLib.h"
@@ -90,7 +90,7 @@ bool Auth::VerifyToken(string Token) {
 }
 
 bool Auth::ProcessKey(Response& response, string Key) {
-	cpr::AsyncResponse  fr = cpr::GetAsync(
+	cpr::AsyncResponse  fr = cpr::PostAsync(
 		cpr::Url{ AUTH_ENDPOINT },
 		cpr::Header{ { "accept", "application/json"} },
 		cpr::Parameters{
@@ -102,7 +102,7 @@ bool Auth::ProcessKey(Response& response, string Key) {
 
 	cpr::Response req = fr.get();
 
-	Sleep(1500);
+	Sleep(2000);
 
 	if (req.status_code == 429) {
 		response.Error = Error(req.text, false);
@@ -110,17 +110,11 @@ bool Auth::ProcessKey(Response& response, string Key) {
 	}
 
 	if (req.status_code != 200) {
-		response.Error = Error("Auth is offline. (ERROR: " + req.status_code + ')', false);
+		response.Error = Error(req.text, false);
 		return false;
 	}
 
 	json json = json::parse(req.text.c_str());
-
-	if (json["fail"] != nullptr) {
-		response.Error = Error((string)json["fail"], false);
-		return false;
-	};
-
 	if (json["token"] == nullptr) {
 		response.Error = Error("Invalid Token.", false);
 		return false;
