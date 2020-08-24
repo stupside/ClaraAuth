@@ -1,5 +1,5 @@
-#include "Response.h"
-#include "Wrapper.h"
+#include "response.h"
+#include "wrapper.h"
 
 #include <iostream>
 #include <nlohmann/json.hpp>
@@ -46,7 +46,8 @@ Package Wrapper::PackageToObject(json JsonObject) {
 
 LicenseKey Wrapper::LicenseKeyToObject(json JsonObject) {
     LicenseKey LicenseKeyObject;
-
+    LicenseKeyObject.m_discord = JsonObject["discord"];
+    LicenseKeyObject.m_customer = JsonObject["customer"];
     LicenseKeyObject.m_expiry = JsonObject["expiry"];
     LicenseKeyObject.m_key = JsonObject["key"];
 

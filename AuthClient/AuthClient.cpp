@@ -6,7 +6,7 @@
 #include <Windows.h>
 #include <iostream>
 
-#define PRODUCT_CODE ("39065a3c301d470590a8dd2b5a6dcafd")
+#define PRODUCT_CODE ("7c9272aa041e4f1e87df88587545f495")
 
 int main()
 {
@@ -19,6 +19,7 @@ int main()
     Response Response;
     bool AuthSucceed = Auth.ProcessKey(Response, Key);
 
+    // THEN YOU CAN DO WHATEVER YOU WANT
     if (AuthSucceed) {
         cout << "------------ Auth Succeed ------------" << endl;
         cout << "Expiry: " << Response.LicenseKey.m_expiry << endl;

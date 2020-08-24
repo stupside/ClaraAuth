@@ -8,7 +8,7 @@
 #endif
 
 #define AUTH_ENDPOINT ((string) "http://api.tenet.ooo/api/LicenseKey/Process")
-//#define AUTH_ENDPOINT ((string) "http://localhost:56494/api/LicenseKey/Test")
+//#define AUTH_ENDPOINT ((string) "http://localhost:56494/api/LicenseKey/Process")
 #define AUTH_ISSUER ((string) "Tenet_Client")
 #define AUTH_AUDIENCE ((string) "Tenet")
 #define AUTH_EXPIRY ((int) 15)

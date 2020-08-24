@@ -2,8 +2,8 @@
 
 #pragma region Classes
 #pragma region LicenseKey
-LicenseKey::LicenseKey(string const& key, string const& expiry)
-    : m_key(key), m_expiry(expiry) {}
+LicenseKey::LicenseKey(string const& key, string const& expiry, string const& discord, string const& customer)
+    : m_key(key), m_expiry(expiry), m_customer(customer), m_discord(discord) {}
 #pragma endregion
 
 #pragma region Package

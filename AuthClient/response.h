@@ -1,3 +1,6 @@
+#ifndef RESPONSE_H
+#define RESPONSE_H
+
 #include <string>
 using namespace std;
 
@@ -5,8 +8,10 @@ using namespace std;
 class LicenseKey {
 public:
     LicenseKey() = default;
-    LicenseKey(string const& key, string const& expiry);
+    LicenseKey(string const& key, string const& expiry, string const& discord, string const& customer);
 public:
+    string m_discord;
+    string m_customer;
     string m_key;
     string m_expiry;
 };
@@ -53,3 +58,5 @@ public:
     Package Package;
     LicenseKey LicenseKey;
 };
+
+#endif
