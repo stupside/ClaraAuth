@@ -22,9 +22,14 @@ int main()
     // THEN YOU CAN DO WHATEVER YOU WANT
     if (AuthSucceed) {
         cout << "------------ Auth Succeed ------------" << endl;
+        cout << "Error: " << Response.Error.m_error << endl;
+
         cout << "Expiry: " << Response.LicenseKey.m_expiry << endl;
         cout << "Product: " << Response.Product.m_name << endl;
         cout << "Package: " << Response.Package.m_name << endl;
+
+        if (!Response.Error.m_succeed)
+            return 0; // Key was Expired or Product Paused / Detected / Maintenance.
     }
     else
     {
