@@ -31,9 +31,7 @@
 
 using nlohmann::json;
 
-Auth::~Auth(void) {
-	cout << "\nAuth reseted.\n" << endl;
-}
+Auth::~Auth(void) { }
 
 void Auth::SetSignature() {
 	auto b32 = cppcodec::base32_rfc4648::encode(m_product_code);
