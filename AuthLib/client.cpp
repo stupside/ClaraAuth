@@ -184,6 +184,6 @@ string Client::GetHwid() {
 	string hwid1 = get_processor_name() + "." + get_BaseBoard() + "." + get_PhysicalMemory();
 	string hwid2 = get_computer_name() + "." + get_username();
 
-	string hwid = 'a' + md5(hwid1) + 'b' + md5(hwid2) + 'c';
+	string hwid = md5(hwid1) + '.' + md5(hwid2);
 	return hwid;
 }

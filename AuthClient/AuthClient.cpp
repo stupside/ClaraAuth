@@ -25,7 +25,7 @@
 #include <Windows.h>
 #include <iostream>
 
-#define PRODUCT_CODE ("701152d938ff4252b556756f766ca2b5")
+#define PRODUCT_CODE ("2897a71d64c845c4a36522ca07840ec9")
 
 int main()
 {
