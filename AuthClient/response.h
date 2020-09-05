@@ -1,6 +1,7 @@
 #ifndef RESPONSE_H
 #define RESPONSE_H
 
+#include <list> 
 #include <string>
 using namespace std;
 
@@ -47,6 +48,16 @@ public:
     string m_error;
     bool m_succeed;
 };
+
+class Variable {
+public:
+    Variable() = default;
+    Variable(string const& name, string const& value);
+public:
+    string m_name;
+    string m_value;
+};
+
 #pragma endregion
 
 class Response {
@@ -57,6 +68,7 @@ public:
     Product Product;
     Package Package;
     LicenseKey LicenseKey;
+    list<Variable> Variables;
 };
 
 #endif

@@ -15,6 +15,7 @@ public:
     Product ProductToObject(json JsonObject);
     Package PackageToObject(json JsonObject);
     LicenseKey LicenseKeyToObject(json JsonObject);
+    list<Variable> VariablesToObject(json JsonObject);
 };
 
 #endif;

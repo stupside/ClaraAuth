@@ -4,7 +4,6 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 
-
 #include <string>
 using nlohmann::json;
 
@@ -52,5 +51,12 @@ LicenseKey Wrapper::LicenseKeyToObject(json JsonObject) {
     LicenseKeyObject.m_key = JsonObject["key"];
 
     return LicenseKeyObject;
+}
+
+list<Variable> Wrapper::VariablesToObject(json JsonObject) {
+    list<Variable> Variables;
+    for (auto& e : JsonObject.items())
+        Variables.push_front(Variable::Variable(e.value()["name"], e.value()["value"]));
+    return Variables;
 }
 #pragma endregion

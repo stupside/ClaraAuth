@@ -25,50 +25,45 @@
 #include <Windows.h>
 #include <iostream>
 
-#define PRODUCT_CODE ("2897a71d64c845c4a36522ca07840ec9")
+#define PRODUCT_CODE ("f6e712c013784f21b0c08c587f1a5d34")
 
 int main()
 {
     Auth Auth(PRODUCT_CODE);
+    Auth.RequestVariables({ "test1", "test3" });
 
     string Key;
-    cout << "Enter a key: ";
-    cin >> Key;
+    cout << "Enter a key: " << endl; cin >> Key;
 
     Response Response;
     bool AuthSucceed = Auth.ProcessKey(Response, Key);
 
-    // THEN YOU CAN DO WHATEVER YOU WANT
-    if (AuthSucceed) {
-
-        if (Response.Error.m_succeed) { // Key was Expired or Product Paused / Detected / Maintenance.
-            cout << GREEN << "------------ Auth Succeed ------------" << RESET << endl;
-        }
-        else {
-            cout << BOLDRED << "------------ Auth Failed ------------" << RESET << endl;
-        }
-
-        cout << "Error: " << Response.Error.m_error << endl;
-
-        cout << "Expiry: " << Response.LicenseKey.m_expiry << endl;
-        cout << "Product: " << Response.Product.m_name << endl;
-        cout << "Package: " << Response.Package.m_name << endl;
-    }
-    else
-    {
+    if (!AuthSucceed) {
         cout << BOLDRED << "------------ Auth Failed ------------" << RESET << endl;
         cout << "Error: " << Response.Error.m_error << endl;
+
+        Sleep(60000);
+        return 0;
     }
-    Sleep(30000);
+
+    if (Response.Error.m_succeed) {
+        cout << GREEN << "------------ Auth Succeed ------------" << RESET << endl;
+    }
+    else {
+        // Key was Expired or Product Paused / Detected / Maintenance. Means the key should not be valid.
+        cout << BOLDRED << "------------ Auth Failed ------------" << RESET << endl;
+    }
+
+    cout << "Error: " << Response.Error.m_error << endl;
+
+    cout << "Expiry: " << Response.LicenseKey.m_expiry << endl;
+    cout << "Product: " << Response.Product.m_name << endl;
+    cout << "Package: " << Response.Package.m_name << endl;
+
+    cout << BOLDRED << "------------ Auth Variables ------------" << RESET << endl;
+    for (auto& Variable : Response.Variables)
+        cout << Variable.m_name << " => " << Variable.m_value << endl;
+
+    Sleep(60000);
+    return 0;
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file

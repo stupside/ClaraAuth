@@ -7,8 +7,12 @@
 #endif
 #endif
 
+#if defined _DEBUG 
+#define AUTH_ENDPOINT ((string) "http://localhost:56494/api/LicenseKey/Process")
+#else 
 #define AUTH_ENDPOINT ((string) "http://api.tenet.ooo/api/LicenseKey/Process")
-//#define AUTH_ENDPOINT ((string) "http://localhost:56494/api/LicenseKey/Process")
+#endif
+
 #define AUTH_ISSUER ((string) "Tenet_Client")
 #define AUTH_AUDIENCE ((string) "Tenet")
 #define AUTH_EXPIRY ((int) 15)
@@ -42,6 +46,7 @@ void Auth::SetSignature() {
 string Auth::BuildToken() {
 
 	json object;
+	object["client"]["variables"] = m_requested_variables;
 	object["client"]["hwid"] = Client::GetHwid();
 	
 	auto datasB64encoded = cppcodec::base64_rfc4648::encode(object.dump()); // This way if we add an encryption method, it will be easier.
@@ -87,6 +92,14 @@ bool Auth::VerifyToken(string Token) {
 	return true;
 }
 
+void Auth::RequestVariables(list<string> Variables) {
+
+	auto is_empty_variable = [&](string s) { return s.empty(); };
+	Variables.remove_if(is_empty_variable);
+
+	m_requested_variables = Variables;
+}
+
 bool Auth::ProcessKey(Response& response, string Key) {
 	cpr::AsyncResponse  fr = cpr::PostAsync(
 		cpr::Url{ AUTH_ENDPOINT },
@@ -130,15 +143,15 @@ bool Auth::ProcessKey(Response& response, string Key) {
 	auto datas = json::parse(datasB64decoded);
 
 	Wrapper Wrapper;
-
 	response.Error = Wrapper.ErrorToObject(datas["error"]);
 	if (datas["product"] != nullptr && datas["package"] != nullptr && datas["licensekey"] != nullptr) {
 		response.Product = Wrapper.ProductToObject(datas["product"]);
 		response.Package = Wrapper.PackageToObject(datas["package"]);
 		response.LicenseKey = Wrapper.LicenseKeyToObject(datas["licensekey"]);
+		//if(datas["variables"] != nullptr && !m_requested_variables.empty())
+			response.Variables = Wrapper.VariablesToObject(datas["variables"]);
 		return true;
 	}
-
 
 	response.Error = Error("Invalid Token.", false);
 	return false;

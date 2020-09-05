@@ -20,6 +20,12 @@ Product::Product(string const& name, string const& version, string const& game_n
 Error::Error(string const& error, bool succeed)
     : m_error(error), m_succeed(succeed) {}
 #pragma endregion
+
+#pragma region Variables
+Variable::Variable(string const& name, string const& value)
+    : m_name(name), m_value(value) {}
+#pragma endregion
+
 #pragma endregion
 
 Response::~Response(void) {}
