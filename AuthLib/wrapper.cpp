@@ -1,11 +1,4 @@
-#include "response.h"
 #include "wrapper.h"
-
-#include <iostream>
-#include <nlohmann/json.hpp>
-
-#include <string>
-using nlohmann::json;
 
 #pragma region Wrapper
 

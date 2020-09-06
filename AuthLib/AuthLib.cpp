@@ -1,30 +1,17 @@
-#ifdef APSTUDIO_INVOKED
-#ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        101
-#define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1001
-#define _APS_NEXT_SYMED_VALUE           101
-#endif
-#endif
-
 #if defined _DEBUG 
-#define AUTH_ENDPOINT ((string) "http://localhost:56494/api/LicenseKey/Process")
+#define AUTH_ENDPOINT ((std::string) "http://localhost:56494/api/LicenseKey/Process")
 #else 
-#define AUTH_ENDPOINT ((string) "http://api.tenet.ooo/api/LicenseKey/Process")
+#define AUTH_ENDPOINT ((std::string) "http://api.tenet.ooo/api/LicenseKey/Process")
 #endif
 
-#define AUTH_ISSUER ((string) "Tenet_Client")
-#define AUTH_AUDIENCE ((string) "Tenet")
+#define AUTH_ISSUER ((std::string) "Tenet_Client")
+#define AUTH_AUDIENCE ((std::string) "Tenet")
 #define AUTH_EXPIRY ((int) 15)
 
 #include "AuthLib.h"
-
 #include "encryption.h"
-
 #include "client.h"
-
 #include "hotp.h"
-
 #include "wrapper.h"
 
 #include <cppcodec/base64_rfc4648.hpp>
@@ -44,20 +31,19 @@ void Auth::SetSignature() {
 	m_security_key = Encryption::sha256(to_string(otp) + Encryption::sha256(m_product_code));
 }
 
-// product_code, sha256, totp
-string Auth::BuildToken() {
+std::string Auth::GetToken() {
 	SetSignature();
 
-	string m_iv = Encryption::iv_key();
+	std::string m_iv = Encryption::iv_key();
 
 	json object;
 	object["client"]["variables"] = m_requested_variables;
-	object["client"]["hwid"] = Client::GetHwid();
+	object["client"]["hwid"] = GetHwid();
 
 	auto encrypted_data = Encryption::encrypt(object.dump(), m_security_key, m_iv);
 	auto encrypted_iv = Encryption::encrypt(m_iv, m_product_code, m_security_key);
 
-	string Token = jwt::create()
+	std::string Token = jwt::create()
 		.set_audience(AUTH_AUDIENCE).set_issuer(AUTH_ISSUER).set_type("JWT")
 		.set_issued_at(std::chrono::system_clock::now()).set_expires_at(std::chrono::system_clock::now() + std::chrono::seconds{ AUTH_EXPIRY })
 		.set_payload_claim("data", jwt::claim(encrypted_data))
@@ -67,13 +53,46 @@ string Auth::BuildToken() {
 	return Token;
 }
 
-void Auth::RequestVariables(list<string> Variables) {
-	auto is_empty_variable = [&](string s) { return s.empty(); };
+std::string Auth::GetHwid() {
+
+	m_hwid_options.sort();
+	m_hwid_options.unique();
+
+	std::string hwid;
+
+	std::string hwid1 = Client::get_computer_sid();
+	std::string hwid2;
+
+	if (!m_hwid_options.empty())
+	{
+		for (HwidOption& HwidOption : m_hwid_options) {
+			switch (HwidOption) {
+			case HwidOption::Base_Board:
+				hwid2 += Client::get_base_board();
+			case HwidOption::Computer_Name:
+				hwid2 += Client::get_computer_name();
+			case HwidOption::Physical_Memory:
+				hwid2 += Client::get_physical_memory();
+			case HwidOption::Username:
+				hwid2 += Client::get_username();
+			}
+		}
+	}
+	return Encryption::sha256(Encryption::sha256(hwid) + (hwid2.empty() ? "" : "." + Encryption::sha256(hwid2)));
+}
+
+void Auth::RequestVariables(std::list<std::string> Variables) {
+
+	Variables.sort();
+	Variables.unique();
+
+	auto is_empty_variable = [&](std::string s) { return s.empty(); };
+
 	Variables.remove_if(is_empty_variable);
 	m_requested_variables = Variables;
 }
 
-bool Auth::VerifyToken(string Token) {
+bool Auth::VerifyToken(std::string Token) {
 	try {
 		jwt::verify()
 			.allow_algorithm(jwt::algorithm::hs256(m_security_key))
@@ -99,26 +118,22 @@ bool Auth::VerifyToken(string Token) {
 	catch (std::invalid_argument Ex) {
 		return false;
 	}
-	catch (int i) {
-		return false;
-	}
 	return true;
 }
 
-bool Auth::ProcessKey(Response& response, string Key) {
+bool Auth::ProcessKey(Response& response, std::string Key) {
 	cpr::AsyncResponse  fr = cpr::PostAsync(
 		cpr::Url{ AUTH_ENDPOINT },
 		cpr::Header{ { "accept", "application/json"} },
 		cpr::Parameters{
-			{ "Token", BuildToken().c_str() },
+			{ "Token", GetToken().c_str() },
 			{ "Key", Key.c_str() }
 		}
 	);
-	fr.wait();
 
 	cpr::Response req = fr.get();
 
-	Sleep(2000);
+	response.elapsed = req.elapsed;
 
 	if (req.status_code == 429) {
 		response.Error = Error(req.text, false);
@@ -126,27 +141,26 @@ bool Auth::ProcessKey(Response& response, string Key) {
 	}
 
 	if (req.status_code != 200) {
-		response.Error = Error(req.text, false);
+		response.Error = Error(req.text.empty() ? req.error.message : req.text, false);
 		return false;
 	}
-
 	json json = json::parse(req.text.c_str());
 	if (json["token"] == nullptr) {
-		response.Error = Error("Invalid Token.", false);
+		response.Error = Error("Token was empty.", false);
 		return false;
 	}
 
 	if (!VerifyToken(json["token"])) {
-		response.Error = Error("Invalid Token.", false);
+		response.Error = Error("Invalid Client Token.", false);
 		return false;
 	}
 
 	auto decoded = jwt::decode(json["token"]);
 
-	string encrypted_iv = decoded.get_payload_claim("iv").as_string();
-	string decrypted_iv = Encryption::decrypt(encrypted_iv, m_product_code, m_security_key);
-	string encrypted_datas = decoded.get_payload_claim("data").as_string();
-	string decrypted_datas = Encryption::decrypt(encrypted_datas, m_security_key, decrypted_iv);
+	std::string encrypted_iv = decoded.get_payload_claim("iv").as_string();
+	std::string decrypted_iv = Encryption::decrypt(encrypted_iv, m_product_code, m_security_key);
+	std::string encrypted_datas = decoded.get_payload_claim("data").as_string();
+	std::string decrypted_datas = Encryption::decrypt(encrypted_datas, m_security_key, decrypted_iv);
 
 	auto datas = json::parse(decrypted_datas);
 
@@ -160,6 +174,6 @@ bool Auth::ProcessKey(Response& response, string Key) {
 		return true;
 	}
 
-	response.Error = Error("Invalid Token.", false);
+	response.Error = Error("Something went wrong.", false);
 	return false;
 }

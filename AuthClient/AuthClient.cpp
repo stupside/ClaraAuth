@@ -25,25 +25,29 @@
 #include <Windows.h>
 #include <iostream>
 
+using namespace std;
+
 #define PRODUCT_CODE ("f6e712c013784f21b0c08c587f1a5d34")
 
 int main()
 {
-    Auth Auth(PRODUCT_CODE);
-    Auth.RequestVariables({ "test1", "test3" });
+    list<HwidOption> HwidOptions = { HwidOption::Physical_Memory, HwidOption::Computer_Name, HwidOption::Base_Board, HwidOption::Username };
+    Auth Auth(PRODUCT_CODE, HwidOptions);
+    
+    Auth.RequestVariables({ "var1", "var2", "var3" });
 
     string Key;
 
     cout << "Enter a key : "; cin >> Key;
-    Key = "98C81C64-CFBC-4ABC-9E55-ADCC5FB7B930";
 
     Response Response;
     bool AuthSucceed = Auth.ProcessKey(Response, Key);
 
+    cout << Response.elapsed << " seconds elasped." << endl;
+
     if (!AuthSucceed) {
         cout << BOLDRED << "------------ Auth Failed ------------" << RESET << endl;
-        cout << "Error: " << Response.Error.m_error << endl;
-
+        cout << BOLDYELLOW << Response.Error.m_error << RESET << endl;
         Sleep(60000);
         return 0;
     }
@@ -52,20 +56,21 @@ int main()
         cout << GREEN << "------------ Auth Succeed ------------" << RESET << endl;
     }
     else {
-        // Key was Expired or Product Paused / Detected / Maintenance. Means the key should not be valid.
+        // Key was Expired or Product Paused / Detected / Maintenance.
         cout << BOLDRED << "------------ Auth Failed ------------" << RESET << endl;
     }
-
-    cout << "Error: " << Response.Error.m_error << endl;
+    cout << BOLDYELLOW << Response.Error.m_error << RESET << endl;
+    cout << CYAN << "Welcome, " << Response.LicenseKey.m_customer << " !" << RESET << endl;
 
     cout << "Expiry: " << Response.LicenseKey.m_expiry << endl;
     cout << "Product: " << Response.Product.m_name << endl;
+    cout << "Description: " << Response.Product.m_description << endl;
+
     cout << "Package: " << Response.Package.m_name << endl;
 
-    cout << BOLDRED << "------------ Auth Variables ------------" << RESET << endl;
+    cout << BOLDRED << "-------------- Variables -------------" << RESET << endl;
     for (auto& Variable : Response.Variables)
         cout << Variable.m_name << " => " << Variable.m_value << endl;
-
     Sleep(60000);
     return 0;
 }

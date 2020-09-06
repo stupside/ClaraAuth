@@ -22,119 +22,7 @@
 
 #pragma comment(lib, "wbemuuid.lib")
 
-string get_processor_name()
-{
-	int CPUInfo[4] = { -1 };
-	char CPUBrandString[0x40];
-	__cpuid(CPUInfo, 0x80000000);
-	unsigned int nExIds = CPUInfo[0];
-	memset(CPUBrandString, 0, sizeof(CPUBrandString));
-	for (int i = 0x80000000; i <= nExIds; ++i)
-	{
-		__cpuid(CPUInfo, i);
-		if (i == 0x80000002)
-			memcpy(CPUBrandString, CPUInfo, sizeof(CPUInfo));
-		else if (i == 0x80000003)
-			memcpy(CPUBrandString + 16, CPUInfo, sizeof(CPUInfo));
-		else if (i == 0x80000004)
-			memcpy(CPUBrandString + 32, CPUInfo, sizeof(CPUInfo));
-	}
-	return CPUBrandString;
-}
-
-string get_username()
-{
-	wchar_t name[UNLEN + 1];
-	DWORD size = UNLEN + 1;
-	std::string UserName;
-	if (GetUserNameW(name, &size))
-	{
-		std::wstring strname(name);
-
-		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv;
-		UserName = conv.to_bytes(strname);
-	}
-	return UserName;
-}
-
-string get_BaseBoard()
-{
-	HRESULT hr;
-	hr = CoInitializeEx(0, COINIT_MULTITHREADED);
-	hr = ::CoInitializeSecurity(NULL, -1, NULL, NULL,
-		RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE,
-		NULL, EOAC_NONE, NULL);
-	CComPtr<IWbemLocator> pWbemLocator;
-	hr = pWbemLocator.CoCreateInstance(CLSID_WbemLocator);
-	CComPtr<IWbemServices> pWbemServices;
-	hr = pWbemLocator->ConnectServer(_bstr_t(L"ROOT\\CIMV2"), NULL, NULL, 0, NULL, 0, NULL, &pWbemServices);
-	CComPtr<IEnumWbemClassObject> pEnum;
-	std::string part1 = ("Select SerialNumber from Win32_BaseBoard");
-
-	CComBSTR cbsQuery(part1.c_str());
-
-	hr = pWbemServices->ExecQuery(_bstr_t("WQL"), cbsQuery, WBEM_FLAG_FORWARD_ONLY, NULL, &pEnum);
-	ULONG uObjectCount = 0;
-	CComPtr<IWbemClassObject> pWmiObject;
-	hr = pEnum->Next(WBEM_INFINITE, 1, &pWmiObject, &uObjectCount);
-	CComVariant cvtVersion;
-	if (uObjectCount != 0) {
-		hr = pWmiObject->Get(L"SerialNumber", 0, &cvtVersion, 0, 0);
-		std::wstring ws(cvtVersion.bstrVal, SysStringLen(cvtVersion.bstrVal));
-
-		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv;
-		std::string sOsVersion = conv.to_bytes(ws);
-		return sOsVersion;
-	}
-	return ("Win32_BaseBoardFAILED");
-}
-
-string get_PhysicalMemory()
-{
-	HRESULT hr;
-	hr = CoInitializeEx(0, COINIT_MULTITHREADED);
-	hr = ::CoInitializeSecurity(NULL, -1, NULL, NULL,
-		RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE,
-		NULL, EOAC_NONE, NULL);
-	CComPtr<IWbemLocator> pWbemLocator;
-	hr = pWbemLocator.CoCreateInstance(CLSID_WbemLocator);
-	CComPtr<IWbemServices> pWbemServices;
-	hr = pWbemLocator->ConnectServer(_bstr_t(L"ROOT\\CIMV2"), NULL, NULL, 0, NULL, 0, NULL, &pWbemServices);
-	CComPtr<IEnumWbemClassObject> pEnum;
-	std::string part1 = ("Select PartNumber FROM Win32_PhysicalMemory WHERE PartNumber IS NOT NULL");
-
-	CComBSTR cbsQuery(part1.c_str());
-
-	hr = pWbemServices->ExecQuery(_bstr_t("WQL"), cbsQuery, WBEM_FLAG_FORWARD_ONLY, NULL, &pEnum);
-	ULONG uObjectCount = 0;
-	CComPtr<IWbemClassObject> pWmiObject;
-	hr = pEnum->Next(WBEM_INFINITE, 1, &pWmiObject, &uObjectCount);
-	CComVariant cvtVersion;
-	if (uObjectCount != 0) {
-		hr = pWmiObject->Get(L"PartNumber", 0, &cvtVersion, 0, 0);
-		std::wstring ws(cvtVersion.bstrVal, SysStringLen(cvtVersion.bstrVal));
-
-		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv;
-		std::string sOsVersion = conv.to_bytes(ws);
-
-		return sOsVersion;
-	}
-	return ("Win32_PhysicalMemoryFAILED");
-}
-
-string get_computer_name()
-{
-	wchar_t buffer[MAX_COMPUTERNAME_LENGTH + 1] = { 0 };
-	DWORD cchBufferSize = sizeof(buffer) / sizeof(buffer[0]);
-	if (!GetComputerNameW(buffer, &cchBufferSize))
-		return "coputerNameFAILED";
-
-	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv;
-	std::string ws2s = conv.to_bytes(std::wstring(&buffer[0]));
-	return ws2s;
-}
-
-string get_computer_sid() {
+string Client::get_computer_sid() {
 	HANDLE h_token = nullptr;
 	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &h_token))
 	{
@@ -180,11 +68,114 @@ string get_computer_sid() {
 	return psz_sid_str;
 }
 
-string Client::GetHwid() {
+string Client::get_processor_name()
+{
+	int CPUInfo[4] = { -1 };
+	char CPUBrandString[0x40];
+	__cpuid(CPUInfo, 0x80000000);
+	unsigned int nExIds = CPUInfo[0];
+	memset(CPUBrandString, 0, sizeof(CPUBrandString));
+	for (int i = 0x80000000; i <= nExIds; ++i)
+	{
+		__cpuid(CPUInfo, i);
+		if (i == 0x80000002)
+			memcpy(CPUBrandString, CPUInfo, sizeof(CPUInfo));
+		else if (i == 0x80000003)
+			memcpy(CPUBrandString + 16, CPUInfo, sizeof(CPUInfo));
+		else if (i == 0x80000004)
+			memcpy(CPUBrandString + 32, CPUInfo, sizeof(CPUInfo));
+	}
+	return CPUBrandString;
+}
 
-	string hwid1 = get_processor_name() + "." + get_BaseBoard() + "." + get_PhysicalMemory();
-	string hwid2 = get_computer_name() + "." + get_username();
+string Client::get_username()
+{
+	wchar_t name[UNLEN + 1];
+	DWORD size = UNLEN + 1;
+	std::string UserName;
+	if (GetUserNameW(name, &size))
+	{
+		std::wstring strname(name);
 
-	string hwid = Encryption::sha256(hwid1) + '.' + Encryption::sha256(hwid2);
-	return hwid;
+		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv;
+		UserName = conv.to_bytes(strname);
+	}
+	return UserName;
+}
+
+string Client::get_base_board()
+{
+	HRESULT hr;
+	hr = CoInitializeEx(0, COINIT_MULTITHREADED);
+	hr = ::CoInitializeSecurity(NULL, -1, NULL, NULL,
+		RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE,
+		NULL, EOAC_NONE, NULL);
+	CComPtr<IWbemLocator> pWbemLocator;
+	hr = pWbemLocator.CoCreateInstance(CLSID_WbemLocator);
+	CComPtr<IWbemServices> pWbemServices;
+	hr = pWbemLocator->ConnectServer(_bstr_t(L"ROOT\\CIMV2"), NULL, NULL, 0, NULL, 0, NULL, &pWbemServices);
+	CComPtr<IEnumWbemClassObject> pEnum;
+	std::string part1 = ("Select SerialNumber from Win32_BaseBoard");
+
+	CComBSTR cbsQuery(part1.c_str());
+
+	hr = pWbemServices->ExecQuery(_bstr_t("WQL"), cbsQuery, WBEM_FLAG_FORWARD_ONLY, NULL, &pEnum);
+	ULONG uObjectCount = 0;
+	CComPtr<IWbemClassObject> pWmiObject;
+	hr = pEnum->Next(WBEM_INFINITE, 1, &pWmiObject, &uObjectCount);
+	CComVariant cvtVersion;
+	if (uObjectCount != 0) {
+		hr = pWmiObject->Get(L"SerialNumber", 0, &cvtVersion, 0, 0);
+		std::wstring ws(cvtVersion.bstrVal, SysStringLen(cvtVersion.bstrVal));
+
+		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv;
+		std::string sOsVersion = conv.to_bytes(ws);
+		return sOsVersion;
+	}
+	return ("Win32_BaseBoardFAILED");
+}
+
+string Client::get_physical_memory()
+{
+	HRESULT hr;
+	hr = CoInitializeEx(0, COINIT_MULTITHREADED);
+	hr = ::CoInitializeSecurity(NULL, -1, NULL, NULL,
+		RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE,
+		NULL, EOAC_NONE, NULL);
+	CComPtr<IWbemLocator> pWbemLocator;
+	hr = pWbemLocator.CoCreateInstance(CLSID_WbemLocator);
+	CComPtr<IWbemServices> pWbemServices;
+	hr = pWbemLocator->ConnectServer(_bstr_t(L"ROOT\\CIMV2"), NULL, NULL, 0, NULL, 0, NULL, &pWbemServices);
+	CComPtr<IEnumWbemClassObject> pEnum;
+	std::string part1 = ("Select PartNumber FROM Win32_PhysicalMemory WHERE PartNumber IS NOT NULL");
+
+	CComBSTR cbsQuery(part1.c_str());
+
+	hr = pWbemServices->ExecQuery(_bstr_t("WQL"), cbsQuery, WBEM_FLAG_FORWARD_ONLY, NULL, &pEnum);
+	ULONG uObjectCount = 0;
+	CComPtr<IWbemClassObject> pWmiObject;
+	hr = pEnum->Next(WBEM_INFINITE, 1, &pWmiObject, &uObjectCount);
+	CComVariant cvtVersion;
+	if (uObjectCount != 0) {
+		hr = pWmiObject->Get(L"PartNumber", 0, &cvtVersion, 0, 0);
+		std::wstring ws(cvtVersion.bstrVal, SysStringLen(cvtVersion.bstrVal));
+
+		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv;
+		std::string sOsVersion = conv.to_bytes(ws);
+
+		return sOsVersion;
+	}
+	return ("Win32_PhysicalMemoryFAILED");
+}
+
+string Client::get_computer_name()
+{
+	wchar_t buffer[MAX_COMPUTERNAME_LENGTH + 1] = { 0 };
+	DWORD cchBufferSize = sizeof(buffer) / sizeof(buffer[0]);
+	if (!GetComputerNameW(buffer, &cchBufferSize))
+		return "coputerNameFAILED";
+
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> conv;
+	std::string ws2s = conv.to_bytes(std::wstring(&buffer[0]));
+	return ws2s;
 }

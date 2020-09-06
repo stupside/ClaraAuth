@@ -64,6 +64,9 @@ class Response {
 private:
 public:
     ~Response(void);
+
+    double elapsed;
+    
     Error Error;
     Product Product;
     Package Package;

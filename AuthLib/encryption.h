@@ -4,7 +4,7 @@
 
 #include <string>
 
-static class Encryption {
+class Encryption {
 private:
 	static std::string encrypt_string(const std::string& plain_text, const std::string& key, const std::string& iv);
 	static std::string decrypt_string(const std::string& cipher_text, const std::string& key, const std::string& iv);

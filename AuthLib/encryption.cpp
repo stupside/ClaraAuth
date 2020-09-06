@@ -1,5 +1,7 @@
 #include "encryption.h"
 
+#include <windows.h>
+
 #include <cryptopp/aes.h>
 #include <cryptopp/osrng.h>
 #include <cryptopp/cryptlib.h>
@@ -10,7 +12,6 @@
 #include <cryptopp/ccm.h>
 
 #pragma comment(lib, "rpcrt4.lib")
-#include <windows.h>
 
 std::string Encryption::encrypt_string(const std::string& plain_text, const std::string& key, const std::string& iv) {
 	std::string cipher_text;

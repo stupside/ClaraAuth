@@ -2,10 +2,9 @@
 #ifndef WRAPPER_H
 #define WRAPPER_H
 
-#include <iostream>
+#include "response.h"
 #include <nlohmann/json.hpp>
 
-using namespace std;
 using nlohmann::json;
 
 class Wrapper {
