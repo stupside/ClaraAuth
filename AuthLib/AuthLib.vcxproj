@@ -163,15 +163,15 @@
     <ClInclude Include="AuthLib.h" />
     <ClInclude Include="bytes.h" />
     <ClInclude Include="client.h" />
+    <ClInclude Include="encryption.h" />
     <ClInclude Include="hotp.h" />
-    <ClInclude Include="md5.h" />
     <ClInclude Include="response.h" />
     <ClInclude Include="wrapper.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AuthLib.cpp" />
     <ClCompile Include="client.cpp" />
-    <ClCompile Include="md5.cpp" />
+    <ClCompile Include="encryption.cpp" />
     <ClCompile Include="response.cpp" />
     <ClCompile Include="sha1.h" />
     <ClCompile Include="wrapper.cpp" />

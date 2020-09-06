@@ -33,7 +33,9 @@ int main()
     Auth.RequestVariables({ "test1", "test3" });
 
     string Key;
-    cout << "Enter a key: " << endl; cin >> Key;
+
+    cout << "Enter a key : "; cin >> Key;
+    Key = "98C81C64-CFBC-4ABC-9E55-ADCC5FB7B930";
 
     Response Response;
     bool AuthSucceed = Auth.ProcessKey(Response, Key);

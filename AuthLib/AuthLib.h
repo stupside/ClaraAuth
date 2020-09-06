@@ -12,8 +12,7 @@ private:
 	bool VerifyToken(string Token);
 	string BuildToken();
 
-	string m_signature;
-
+	string m_security_key;
 	const string m_product_code;
 
 	list<string> m_requested_variables;

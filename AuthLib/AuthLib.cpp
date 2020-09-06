@@ -19,9 +19,10 @@
 
 #include "AuthLib.h"
 
+#include "encryption.h"
+
 #include "client.h"
 
-#include "md5.h"
 #include "hotp.h"
 
 #include "wrapper.h"
@@ -40,30 +41,42 @@ Auth::~Auth(void) { }
 void Auth::SetSignature() {
 	auto b32 = cppcodec::base32_rfc4648::encode(m_product_code);
 	auto otp = totp(Bytes::fromBase32(b32), time(nullptr), 0, AUTH_EXPIRY, 6);
-	m_signature = md5(to_string(otp) + m_product_code);
+	m_security_key = Encryption::sha256(to_string(otp) + Encryption::sha256(m_product_code));
 }
 
+// product_code, sha256, totp
 string Auth::BuildToken() {
+	SetSignature();
+
+	string m_iv = Encryption::iv_key();
 
 	json object;
 	object["client"]["variables"] = m_requested_variables;
 	object["client"]["hwid"] = Client::GetHwid();
-	
-	auto datasB64encoded = cppcodec::base64_rfc4648::encode(object.dump()); // This way if we add an encryption method, it will be easier.
 
-	SetSignature();
+	auto encrypted_data = Encryption::encrypt(object.dump(), m_security_key, m_iv);
+	auto encrypted_iv = Encryption::encrypt(m_iv, m_product_code, m_security_key);
 
-	return jwt::create()
-		.set_audience(AUTH_AUDIENCE).set_issuer(AUTH_ISSUER).set_type("JWS")
+	string Token = jwt::create()
+		.set_audience(AUTH_AUDIENCE).set_issuer(AUTH_ISSUER).set_type("JWT")
 		.set_issued_at(std::chrono::system_clock::now()).set_expires_at(std::chrono::system_clock::now() + std::chrono::seconds{ AUTH_EXPIRY })
-		.set_payload_claim("data", jwt::claim(std::set<std::string> { datasB64encoded }))
-		.sign(jwt::algorithm::hs256{ m_signature });
+		.set_payload_claim("data", jwt::claim(encrypted_data))
+		.set_payload_claim("iv", jwt::claim(encrypted_iv))
+		.sign(jwt::algorithm::hs256{ m_security_key });
+
+	return Token;
+}
+
+void Auth::RequestVariables(list<string> Variables) {
+	auto is_empty_variable = [&](string s) { return s.empty(); };
+	Variables.remove_if(is_empty_variable);
+	m_requested_variables = Variables;
 }
 
 bool Auth::VerifyToken(string Token) {
 	try {
 		jwt::verify()
-			.allow_algorithm(jwt::algorithm::hs256(m_signature))
+			.allow_algorithm(jwt::algorithm::hs256(m_security_key))
 			.with_audience(std::set<std::string>{ AUTH_AUDIENCE })
 			.with_issuer(AUTH_ISSUER)
 			.verify(jwt::decode(Token));
@@ -90,14 +103,6 @@ bool Auth::VerifyToken(string Token) {
 		return false;
 	}
 	return true;
-}
-
-void Auth::RequestVariables(list<string> Variables) {
-
-	auto is_empty_variable = [&](string s) { return s.empty(); };
-	Variables.remove_if(is_empty_variable);
-
-	m_requested_variables = Variables;
 }
 
 bool Auth::ProcessKey(Response& response, string Key) {
@@ -137,10 +142,13 @@ bool Auth::ProcessKey(Response& response, string Key) {
 	}
 
 	auto decoded = jwt::decode(json["token"]);
-	auto datasB64encoded = decoded.get_payload_claim("data").as_string();
-	auto datasB64decoded = cppcodec::base64_rfc4648::decode(datasB64encoded); // This way if we add an encryption method, it will be easier.
 
-	auto datas = json::parse(datasB64decoded);
+	string encrypted_iv = decoded.get_payload_claim("iv").as_string();
+	string decrypted_iv = Encryption::decrypt(encrypted_iv, m_product_code, m_security_key);
+	string encrypted_datas = decoded.get_payload_claim("data").as_string();
+	string decrypted_datas = Encryption::decrypt(encrypted_datas, m_security_key, decrypted_iv);
+
+	auto datas = json::parse(decrypted_datas);
 
 	Wrapper Wrapper;
 	response.Error = Wrapper.ErrorToObject(datas["error"]);
@@ -148,8 +156,7 @@ bool Auth::ProcessKey(Response& response, string Key) {
 		response.Product = Wrapper.ProductToObject(datas["product"]);
 		response.Package = Wrapper.PackageToObject(datas["package"]);
 		response.LicenseKey = Wrapper.LicenseKeyToObject(datas["licensekey"]);
-		//if(datas["variables"] != nullptr && !m_requested_variables.empty())
-			response.Variables = Wrapper.VariablesToObject(datas["variables"]);
+		response.Variables = Wrapper.VariablesToObject(datas["variables"]);
 		return true;
 	}
 
