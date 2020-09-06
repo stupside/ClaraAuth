@@ -32,6 +32,7 @@ using namespace std;
 int main()
 {
     list<HwidOption> HwidOptions = { HwidOption::Physical_Memory, HwidOption::Computer_Name, HwidOption::Base_Board, HwidOption::Username };
+
     Auth Auth(PRODUCT_CODE, HwidOptions);
     
     Auth.RequestVariables({ "var1", "var2", "var3" });
