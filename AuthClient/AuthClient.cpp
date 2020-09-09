@@ -25,24 +25,32 @@
 #include <Windows.h>
 #include <iostream>
 
+#include "antidebug.h"
+#include "xor.h"
+
+using namespace tenet;
 using namespace std;
 
-#define PRODUCT_CODE ("f6e712c013784f21b0c08c587f1a5d34")
+#define PRODUCT_CODE (_xor_("2897a71d64c845c4a36522ca07840ec9"))
 
 int main()
 {
     list<HwidOption> HwidOptions = { HwidOption::Physical_Memory, HwidOption::Computer_Name, HwidOption::Base_Board, HwidOption::Username };
-
     Auth Auth(PRODUCT_CODE, HwidOptions);
     
-    Auth.RequestVariables({ "var1", "var2", "var3" });
+    Auth.RequestVariables({ _xor_("var1"), _xor_("var2"), _xor_("var3") });
 
     string Key;
-
     cout << "Enter a key : "; cin >> Key;
 
     Response Response;
     bool AuthSucceed = Auth.ProcessKey(Response, Key);
+
+    { // Protection
+        protection_struct* protection{ 0 };
+        protection->initialize();
+    }
+
 
     cout << Response.elapsed << " seconds elasped." << endl;
 

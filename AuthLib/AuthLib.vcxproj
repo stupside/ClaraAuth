@@ -167,6 +167,7 @@
     <ClInclude Include="hotp.h" />
     <ClInclude Include="response.h" />
     <ClInclude Include="wrapper.h" />
+    <ClInclude Include="xor.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AuthLib.cpp" />

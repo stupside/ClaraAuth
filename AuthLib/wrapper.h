@@ -5,6 +5,7 @@
 #include "response.h"
 #include <nlohmann/json.hpp>
 
+using namespace tenet;
 using nlohmann::json;
 
 class Wrapper {
