@@ -28,22 +28,21 @@
 #include "antidebug.h"
 #include "xor.h"
 
-using namespace tenet;
 using namespace std;
 
-#define PRODUCT_CODE (_xor_("2897a71d64c845c4a36522ca07840ec9"))
+#define PRODUCT_CODE (_xor_("f6e712c013784f21b0c08c587f1a5d34"))
 
 int main()
 {
-    list<HwidOption> HwidOptions = { HwidOption::Physical_Memory, HwidOption::Computer_Name, HwidOption::Base_Board, HwidOption::Username };
-    Auth Auth(PRODUCT_CODE, HwidOptions);
+    list<tenet::HwidOption> HwidOptions = { tenet::HwidOption::Physical_Memory, tenet::HwidOption::Computer_Name, tenet::HwidOption::Base_Board, tenet::HwidOption::Username };
+    tenet::Auth Auth(PRODUCT_CODE, HwidOptions);
     
     Auth.RequestVariables({ _xor_("var1"), _xor_("var2"), _xor_("var3") });
 
     string Key;
     cout << "Enter a key : "; cin >> Key;
 
-    Response Response;
+    tenet::Response Response;
     bool AuthSucceed = Auth.ProcessKey(Response, Key);
 
     { // Protection

@@ -15,9 +15,9 @@
 #include <sddl.h>
 
 #if defined _DEBUG 
-#define AUTH_ENDPOINT ((std::string) _xor_("http://localhost:56494/api/LicenseKey/Process"))
+#define AUTH_ENDPOINT ((std::string) _xor_("http://localhost:56494/licensekey/process"))
 #else 
-#define AUTH_ENDPOINT ((std::string) _xor_("http://api.tenet.ooo/api/LicenseKey/Process"))
+#define AUTH_ENDPOINT ((std::string) _xor_("http://api.tenet.ooo/licensekey/process"))
 #endif
 
 #define AUTH_ISSUER ((std::string) _xor_("Tenet_Client"))
@@ -53,7 +53,6 @@ namespace tenet {
 			.set_payload_claim(_xor_("data"), jwt::claim(encrypted_data))
 			.set_payload_claim(_xor_("iv"), jwt::claim(encrypted_iv))
 			.sign(jwt::algorithm::hs256{ m_security_key });
-
 		return Token;
 	}
 
@@ -150,12 +149,12 @@ namespace tenet {
 		}
 		json json = json::parse(req.text.c_str());
 		if (json[_xor_("token")] == nullptr) {
-			response.Error = Error(_xor_("Token was empty."), false);
+			response.Error = Error(_xor_("Token was empty"), false);
 			return false;
 		}
 
 		if (!VerifyToken(json[_xor_("token")])) {
-			response.Error = Error(_xor_("Invalid Client Token."), false);
+			response.Error = Error(_xor_("Invalid client signature"), false);
 			return false;
 		}
 
