@@ -17,7 +17,7 @@
 #if defined _DEBUG 
 #define AUTH_ENDPOINT ((std::string) _xor_("http://localhost:56494/licensekey/process"))
 #else 
-#define AUTH_ENDPOINT ((std::string) _xor_("http://api.tenet.ooo/licensekey/process"))
+#define AUTH_ENDPOINT ((std::string) _xor_("http://api.tenet.ooo/licensekeys/process"))
 #endif
 
 #define AUTH_ISSUER ((std::string) _xor_("Tenet_Client"))
