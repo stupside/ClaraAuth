@@ -1,9 +1,6 @@
-#ifndef SHA1_H
-#define SHA1_H
-
 #include <iostream>
 #include <cassert>
-#include "bytes.h"
+#include "../helpers/bytes.h"
 
 typedef Bytes::ByteString(*HmacFunc)(const Bytes::ByteString&, const Bytes::ByteString&);
 
@@ -160,5 +157,3 @@ inline Bytes::ByteString hmacSha1(const Bytes::ByteString& key, const Bytes::Byt
 
 	return sha1(outerMsg);
 }
-
-#endif

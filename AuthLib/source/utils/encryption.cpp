@@ -1,4 +1,4 @@
-#include "encryption.h"
+#include "../utils/encryption.h"
 
 #include <windows.h>
 
@@ -60,8 +60,8 @@ std::string Encryption::decrypt_string(const std::string& cipher_text, const std
 
 std::string Encryption::sha256(const std::string& plain_text) {
 	std::string hashed_text;
-	
-	try{
+
+	try {
 		CryptoPP::SHA256 hash;
 
 		CryptoPP::StringSource hashing(plain_text, true,

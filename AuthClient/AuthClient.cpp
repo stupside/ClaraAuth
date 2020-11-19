@@ -3,53 +3,39 @@
 #include <Windows.h>
 #include <iostream>
 
-#include "antidebug.h"
-#include "xor.h"
-
-using namespace std;
-
-#define PRODUCT_CODE (_xor_("2897a71d64c845c4a36522ca07840ec9"))
+#pragma region secret
+    #define PRODUCT_CODE ((std::string)"a7b34de66a5c4e85b4596b85123675d2")
+#pragma endregion
 
 int main()
 {
-    list<tenet::HwidOption> HwidOptions = { tenet::HwidOption::Physical_Memory, tenet::HwidOption::Computer_Name, tenet::HwidOption::Base_Board, tenet::HwidOption::Username };
-    tenet::Auth Auth(PRODUCT_CODE, HwidOptions);
-    
-    Auth.RequestVariables({ _xor_("var1"), _xor_("var2"), _xor_("var3") });
+    tenet::Auth auth(PRODUCT_CODE);
 
-    string Key;
-    cout << "Enter a key : "; cin >> Key;
+    std::list<tenet::HwidOption> options 
+        = { tenet::HwidOption::Physical_Memory, tenet::HwidOption::Computer_Name, tenet::HwidOption::Base_Board, tenet::HwidOption::Username };
 
-    tenet::Response Response;
-    bool AuthSucceed = Auth.ProcessKey(Response, Key);
+    auth.with_hwid(options);
+    auth.with_variables({ "var1", "var2" });
 
+    std::string key;
+    std::cout << "Enter a key : "; std::cin >> key;
+
+    tenet::Response response = auth.process(key);
+
+    if (response.Succeed())
     {
-        protection_struct* protection{ 0 };
-        protection->initialize();
+        std::cout << "product: " << response.licenseKey->product.name << std::endl;
+        std::cout << "package: " << response.licenseKey->package.name << std::endl;
+        std::cout << "expiration: " << response.licenseKey->expiration << std::endl;
+
+        for (auto& e : response.Variables()) {
+            std::cout << e.first << " = " << e.second << std::endl;
+        }
+    }
+    else {
+        std::cout << response.Message() << std::endl;
     }
 
-    cout << Response.elapsed << " seconds elasped." << endl;
-    if (!AuthSucceed) { // FIRST CHECK !
-        cout << "------------ Auth Failed ------------" << endl;
-        cout << Response.Error.m_error << endl;
-        Sleep(60000);
-        return 0;
-    }
-
-    if (Response.Error.m_succeed) { // SECOND CHECK !
-        cout << "------------ Auth Succeed ------------" << endl;
-    }
-    else { // Key was Expired or Product Paused / Detected / Maintenance.
-        cout << "------------ Auth Failed ------------" << endl;
-    }
-    cout << Response.Error.m_error << endl;
-    cout << "Expiry: " << Response.LicenseKey.m_expiry << endl;
-    cout << "Product: " << Response.Product.m_name << endl;
-    cout << "Package: " << Response.Package.m_name << endl;
-
-    cout << "-------------- Variables -------------" << endl;
-    for (auto& Variable : Response.Variables)
-        cout << Variable.m_name << " => " << Variable.m_value << endl;
     Sleep(60000);
     return 0;
 }

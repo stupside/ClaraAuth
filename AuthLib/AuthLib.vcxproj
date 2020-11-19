@@ -163,21 +163,27 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AuthLib.h" />
-    <ClInclude Include="bytes.h" />
-    <ClInclude Include="client.h" />
-    <ClInclude Include="encryption.h" />
-    <ClInclude Include="hotp.h" />
-    <ClInclude Include="response.h" />
-    <ClInclude Include="wrapper.h" />
+    <ClInclude Include="source\helpers\bytes.h" />
+    <ClInclude Include="source\helpers\sha1.h" />
+    <ClInclude Include="source\mappers\jsonMapper.h" />
+    <ClInclude Include="source\models\requests.h" />
+    <ClInclude Include="source\models\responses.h" />
+    <ClInclude Include="source\utils\encryption.h" />
+    <ClInclude Include="source\utils\hardware.h" />
+    <ClInclude Include="source\utils\token.h" />
     <ClInclude Include="xor.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AuthLib.cpp" />
-    <ClCompile Include="client.cpp" />
-    <ClCompile Include="encryption.cpp" />
-    <ClCompile Include="response.cpp" />
-    <ClCompile Include="sha1.h" />
-    <ClCompile Include="wrapper.cpp" />
+    <ClCompile Include="source\exceptions\GenericException.h" />
+    <ClCompile Include="source\helpers\hotp.h" />
+    <ClCompile Include="source\helpers\xor.h" />
+    <ClCompile Include="source\mappers\jsonMapper.cpp" />
+    <ClCompile Include="source\models\requests.cpp" />
+    <ClCompile Include="source\models\responses.cpp" />
+    <ClCompile Include="source\utils\encryption.cpp" />
+    <ClCompile Include="source\utils\hardware.cpp" />
+    <ClCompile Include="source\utils\token.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Conanfile.py" />

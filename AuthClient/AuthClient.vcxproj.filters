@@ -23,13 +23,7 @@
     <ClInclude Include="AuthLib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="response.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="antidebug.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="xor.h">
+    <ClInclude Include="responses.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

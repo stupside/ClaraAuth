@@ -2,182 +2,140 @@
 
 #include "xor.h"
 
-#include "encryption.h"
-#include "client.h"
-#include "hotp.h"
-#include "wrapper.h"
+#include "source/exceptions/GenericException.h"
 
-#include <cppcodec/base64_rfc4648.hpp>
-#include <cppcodec/base32_rfc4648.hpp>
+#include "source/utils/hardware.h"
+#include "source/utils/token.h"
+#include "source/utils/encryption.h"
+#include "source/mappers/jsonMapper.h"
+
 #include <nlohmann/json.hpp>
-#include <jwt-cpp/jwt.h>
 #include <cpr/cpr.h>
 #include <sddl.h>
 
+using nlohmann::json;
+
 #if defined _DEBUG 
-#define AUTH_ENDPOINT ((std::string) _xor_("http://localhost:56494/licensekey/process"))
+#define AUTH_ENDPOINT ((std::string) _xor_("http://localhost:56494/v3/licensekey/process"))
 #else 
-#define AUTH_ENDPOINT ((std::string) _xor_("http://api.tenet.ooo/licensekeys/process"))
+#define AUTH_ENDPOINT ((std::string) _xor_("http://api.tenet.ooo/v3/licensekeys/process"))
 #endif
 
 #define AUTH_ISSUER ((std::string) _xor_("Tenet_Client"))
 #define AUTH_AUDIENCE ((std::string) _xor_("Tenet"))
 #define AUTH_EXPIRY ((int) 15)
 
-using nlohmann::json;
-
 namespace tenet {
-	Auth::~Auth(void) { }
+	void Auth::with_custom_hwid(std::string custom_hwid) {
+		if (!init)
+			throw GenericException("Auth not initialized");
 
-	void Auth::SetSignature() {
-		auto b32 = cppcodec::base32_rfc4648::encode(m_product_code);
-		auto otp = totp(Bytes::fromBase32(b32), time(nullptr), 0, AUTH_EXPIRY, 6);
-		m_security_key = Encryption::sha256(to_string(otp) + Encryption::sha256(m_product_code));
+		hwid = custom_hwid;
 	}
 
-	std::string Auth::GetToken() {
-		SetSignature();
+	void Auth::with_hwid(std::list<HwidOption> hwid_options){
+		if (!init)
+			throw GenericException("Auth not initialized");
 
-		std::string m_iv = Encryption::iv_key();
+		hwid_options.sort();
+		hwid_options.unique();
 
-		json object;
-		object[_xor_("client")][_xor_("variables")] = m_requested_variables;
-		object[_xor_("client")][_xor_("hwid")] = GetHwid();
-
-		auto encrypted_data = Encryption::encrypt(object.dump(), m_security_key, m_iv);
-		auto encrypted_iv = Encryption::encrypt(m_iv, m_product_code, m_security_key);
-
-		std::string Token = jwt::create()
-			.set_audience(AUTH_AUDIENCE).set_issuer(AUTH_ISSUER).set_type(_xor_("JWT"))
-			.set_issued_at(std::chrono::system_clock::now()).set_expires_at(std::chrono::system_clock::now() + std::chrono::seconds{ AUTH_EXPIRY })
-			.set_payload_claim(_xor_("data"), jwt::claim(encrypted_data))
-			.set_payload_claim(_xor_("iv"), jwt::claim(encrypted_iv))
-			.sign(jwt::algorithm::hs256{ m_security_key });
-		return Token;
-	}
-
-	std::string Auth::GetHwid() {
-
-		m_hwid_options.sort();
-		m_hwid_options.unique();
-
-		std::string hwid;
-
-		std::string hwid1 = Client::get_computer_sid();
+		std::string hwid1 = Hardware::get_computer_sid();
 		std::string hwid2;
 
-		if (!m_hwid_options.empty())
+		if (!hwid_options.empty())
 		{
-			for (HwidOption& HwidOption : m_hwid_options) {
+			for (HwidOption& HwidOption : hwid_options) {
 				switch (HwidOption) {
 				case HwidOption::Base_Board:
-					hwid2 += Client::get_base_board();
+					hwid2 += Hardware::get_base_board();
 				case HwidOption::Computer_Name:
-					hwid2 += Client::get_computer_name();
+					hwid2 += Hardware::get_computer_name();
 				case HwidOption::Physical_Memory:
-					hwid2 += Client::get_physical_memory();
+					hwid2 += Hardware::get_physical_memory();
 				case HwidOption::Username:
-					hwid2 += Client::get_username();
+					hwid2 += Hardware::get_username();
 				}
 			}
 		}
-		return Encryption::sha256(Encryption::sha256(hwid) + (hwid2.empty() ? "" : "." + Encryption::sha256(hwid2)));
+		hwid = Encryption::sha256((hwid2.empty() ? "" : "." + Encryption::sha256(hwid2)));
 	}
 
-	void Auth::RequestVariables(std::list<std::string> Variables) {
+	void Auth::with_variables(std::list<std::string> variables) {
+		if (!init)
+			throw GenericException("Auth not initialized");
 
-		Variables.sort();
-		Variables.unique();
+		variables.sort();
+		variables.unique();
 
 		auto is_empty_variable = [&](std::string s) { return s.empty(); };
 
-		Variables.remove_if(is_empty_variable);
-		m_requested_variables = Variables;
+		variables.remove_if(is_empty_variable);
+		requested_variables = variables;
 	}
 
-	bool Auth::VerifyToken(std::string Token) {
-		try {
-			jwt::verify()
-				.allow_algorithm(jwt::algorithm::hs256(m_security_key))
-				.with_audience(std::set<std::string>{ AUTH_AUDIENCE })
-				.with_issuer(AUTH_ISSUER)
-				.verify(jwt::decode(Token));
-		}
-		catch (jwt::signature_verification_exception Ex) {
-			return false;
-		}
-		catch (jwt::token_verification_exception Ex) {
-			return false;
-		}
-		catch (jwt::rsa_exception Ex) {
-			return false;
-		}
-		catch (jwt::signature_generation_exception Ex) {
-			return false;
-		}
-		catch (std::bad_cast Ex) {
-			return false;
-		}
-		catch (std::invalid_argument Ex) {
-			return false;
-		}
-		return true;
-	}
+	tenet::Response Auth::process(std::string key) {
 
-	bool Auth::ProcessKey(Response& response, std::string Key) {
+		if (!init)
+			throw GenericException("Auth not initialized");
+
+		json object;
+		object[_xor_("client")][_xor_("variables")] = requested_variables;
+		object[_xor_("client")][_xor_("hwid")] = hwid;
+
+		std::string token = Token::generate(object, product_code);
+
 		cpr::AsyncResponse  fr = cpr::PostAsync(
 			cpr::Url{ AUTH_ENDPOINT },
 			cpr::Header{ { _xor_("accept"), _xor_("application/json")} },
 			cpr::Parameters{
-				{ _xor_("Token"), GetToken().c_str() },
-				{ _xor_("Key"), Key.c_str() }
+				{ _xor_("token"), token.c_str() },
+				{ _xor_("key"), key.c_str() }
 			}
 		);
 
 		cpr::Response req = fr.get();
 
-		response.elapsed = req.elapsed;
-
-		if (req.status_code == 429) {
-			response.Error = Error(req.text, false);
-			return false;
-		}
+		#if defined _DEBUG 
+		std::cout << "text: " << req.text << std::endl;
+		std::cout << "status_code: "<< req.status_code << std::endl;
+		std::cout << "message: " << req.error.message << std::endl;
+		std::cout << "reason: " << req.reason << std::endl;
+		#endif
 
 		if (req.status_code != 200) {
-			response.Error = Error(req.text.empty() ? req.error.message : req.text, false);
-			return false;
+			return tenet::Response(req.text.empty() ? "The API can't be reached" : req.text);
 		}
-		json json = json::parse(req.text.c_str());
-		if (json[_xor_("token")] == nullptr) {
-			response.Error = Error(_xor_("Token was empty"), false);
-			return false;
+		
+		std::string data;
+		try {
+		 	data = Token::verify(req.text, product_code);
 		}
-
-		if (!VerifyToken(json[_xor_("token")])) {
-			response.Error = Error(_xor_("Invalid client signature"), false);
-			return false;
+		catch(GenericException ex){
+			return tenet::Response(ex.what());
 		}
 
-		auto decoded = jwt::decode(json[_xor_("token")]);
+		if (data.empty())
+			return tenet::Response("Empty data set");
 
-		std::string encrypted_iv = decoded.get_payload_claim(_xor_("iv")).as_string();
-		std::string decrypted_iv = Encryption::decrypt(encrypted_iv, m_product_code, m_security_key);
-		std::string encrypted_datas = decoded.get_payload_claim(_xor_("data")).as_string();
-		std::string decrypted_datas = Encryption::decrypt(encrypted_datas, m_security_key, decrypted_iv);
+		json datas = json::parse(data);
 
-		auto datas = json::parse(decrypted_datas);
+		json json_licenseKey = datas["LicenseKey"];
+		json json_variables = datas["Variables"];
 
-		Wrapper Wrapper;
-		response.Error = Wrapper.ErrorToObject(datas[_xor_("error")]);
-		if (datas[_xor_("product")] != nullptr && datas[_xor_("package")] != nullptr && datas[_xor_("licensekey")] != nullptr) {
-			response.Product = Wrapper.ProductToObject(datas[_xor_("product")]);
-			response.Package = Wrapper.PackageToObject(datas[_xor_("package")]);
-			response.LicenseKey = Wrapper.LicenseKeyToObject(datas[_xor_("licensekey")]);
-			response.Variables = Wrapper.VariablesToObject(datas[_xor_("variables")]);
-			return true;
+		tenet::Response *response = new tenet::Response(true, "Authentication succeed");
+
+		response->licenseKey = new tenet::LicenseKeyResponse(ResponseMapper::mapToLicenseKeyResponse(json_licenseKey));
+
+		if (!json_variables.is_null())
+		{
+			for (json json_variable : json_variables) {
+				if (!json_variable.is_null()) {
+					response->variables.insert({ json_variable["Name"].get<std::string>(), json_variable["Value"].get<std::string>() });
+				}
+			}
 		}
 
-		response.Error = Error(_xor_("Something went wrong."), false);
-		return false;
+		return *response;
 	}
 }

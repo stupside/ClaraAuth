@@ -2,7 +2,7 @@
 #pragma warning (disable: 4172)
 #define _WIN32_WINNT 0x0500
 
-#include "client.h"
+#include "../utils/hardware.h"
 
 #include "encryption.h"
 
@@ -22,7 +22,7 @@
 
 #pragma comment(lib, "wbemuuid.lib")
 
-string Client::get_computer_sid() {
+std::string Hardware::get_computer_sid() {
 	HANDLE h_token = nullptr;
 	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &h_token))
 	{
@@ -63,19 +63,19 @@ string Client::get_computer_sid() {
 		return "sidFAILED";
 	}
 
-	string psz_sid_str(psz_sid);
+	std::string psz_sid_str(psz_sid);
 
 	return psz_sid_str;
 }
 
-string Client::get_processor_name()
+std::string Hardware::get_processor_name()
 {
 	int CPUInfo[4] = { -1 };
 	char CPUBrandString[0x40];
 	__cpuid(CPUInfo, 0x80000000);
 	unsigned int nExIds = CPUInfo[0];
 	memset(CPUBrandString, 0, sizeof(CPUBrandString));
-	for (int i = 0x80000000; i <= nExIds; ++i)
+	for (unsigned int i = 0x80000000; i <= nExIds; ++i)
 	{
 		__cpuid(CPUInfo, i);
 		if (i == 0x80000002)
@@ -88,7 +88,7 @@ string Client::get_processor_name()
 	return CPUBrandString;
 }
 
-string Client::get_username()
+std::string Hardware::get_username()
 {
 	wchar_t name[UNLEN + 1];
 	DWORD size = UNLEN + 1;
@@ -103,7 +103,7 @@ string Client::get_username()
 	return UserName;
 }
 
-string Client::get_base_board()
+std::string Hardware::get_base_board()
 {
 	HRESULT hr;
 	hr = CoInitializeEx(0, COINIT_MULTITHREADED);
@@ -135,7 +135,7 @@ string Client::get_base_board()
 	return ("Win32_BaseBoardFAILED");
 }
 
-string Client::get_physical_memory()
+std::string Hardware::get_physical_memory()
 {
 	HRESULT hr;
 	hr = CoInitializeEx(0, COINIT_MULTITHREADED);
@@ -168,7 +168,7 @@ string Client::get_physical_memory()
 	return ("Win32_PhysicalMemoryFAILED");
 }
 
-string Client::get_computer_name()
+std::string Hardware::get_computer_name()
 {
 	wchar_t buffer[MAX_COMPUTERNAME_LENGTH + 1] = { 0 };
 	DWORD cchBufferSize = sizeof(buffer) / sizeof(buffer[0]);

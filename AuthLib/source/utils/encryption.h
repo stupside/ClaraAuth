@@ -1,7 +1,3 @@
-#pragma once
-#ifndef ENCRYPTION_H
-#define ENCRYPTION_H
-
 #include <string>
 
 class Encryption {
@@ -17,5 +13,3 @@ public:
 
 	static std::string iv_key();
 };
-
-#endif;

@@ -1,12 +1,7 @@
-#ifndef BYTES_H
-#define BYTES_H
-
 #define _CRT_SECURE_NO_WARNINGS
 #define WIN32_LEAN_AND_MEAN
 
-
 #include <iostream>
-
 
 using namespace std;
 
@@ -339,12 +334,9 @@ namespace Bytes
 	class ByteStringDestructor
 	{
 	private:
-		/** The byte string to clear. */
 		ByteString* m_bs;
-
 	public:
 		ByteStringDestructor(ByteString* bs) : m_bs(bs) {}
 		~ByteStringDestructor() { clearByteString(m_bs); }
 	};
 }
-#endif

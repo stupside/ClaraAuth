@@ -1,7 +1,11 @@
 #ifndef AUTH_H
 #define AUTH_H
 
-#include "response.h"
+#include <list>
+#include <string>
+#include <stdio.h>
+
+#include "source/models/responses.h"
 
 namespace tenet {
 
@@ -12,33 +16,25 @@ namespace tenet {
 		Physical_Memory
 	};
 
-	class Auth
-	{
+	class Auth {
 	private:
-		void SetSignature();
+		bool init = false;
+		std::string hwid;
 
-		std::string GetHwid();
-		std::list<HwidOption> m_hwid_options;
+		std::list<std::string> requested_variables;
+		const std::string product_code;
 
-		std::string GetToken();
-		bool VerifyToken(std::string Token);
-
-		std::string m_security_key;
-		const std::string m_product_code;
-
-		std::list<std::string> m_requested_variables;
 	public:
+		Auth(std::string product_code) : product_code(product_code), init(true) { }
 
-		Auth(std::string product_code, std::list<HwidOption> hwid_options = std::list<HwidOption>()) : m_product_code(product_code), m_hwid_options(hwid_options) { }
-		~Auth(void);
+		void with_custom_hwid(std::string custom_hwid);
+		void with_hwid(std::list<HwidOption> hwid_options = std::list<HwidOption>());
 
-		void RequestVariables(std::list<std::string> Variables);
+		void with_variables(std::list<std::string> variables);
 
-		bool ProcessKey(Response& response, std::string Key);
+		tenet::Response process(std::string key);
+
+		~Auth(void) { }
 	};
 }
-
-
-
-
 #endif

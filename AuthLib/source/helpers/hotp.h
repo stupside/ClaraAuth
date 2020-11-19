@@ -1,10 +1,7 @@
-#ifndef OTP_H
-#define OTP_H
-
 #include <iostream>
 #include <cstdint>
 
-#include "sha1.h"
+#include "../helpers/sha1.h"
 
 /*
 	 * The 64-bit-blocksize variant of HMAC-SHA1.
@@ -58,6 +55,3 @@ inline uint32_t totp(const Bytes::ByteString& key, uint64_t timeNow, uint64_t ti
 	uint64_t timeValue = (timeNow - timeStart) / timeStep;
 	return hotp(key, timeValue, digitCount, hmacf);
 }
-
-
-#endif
