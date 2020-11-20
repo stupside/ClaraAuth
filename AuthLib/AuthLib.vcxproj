@@ -188,7 +188,7 @@
     <ClCompile Include="src\utils\token.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Conanfile.py" />
+    <None Include="conanfile.py" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />

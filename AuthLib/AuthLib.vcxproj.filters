@@ -79,9 +79,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Conanfile.py" />
+    <Text Include="CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="CMakeLists.txt" />
+    <None Include="conanfile.py" />
   </ItemGroup>
 </Project>
