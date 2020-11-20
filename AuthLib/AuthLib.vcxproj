@@ -165,27 +165,27 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AuthLib.h" />
-    <ClInclude Include="source\helpers\bytes.h" />
-    <ClInclude Include="source\helpers\sha1.h" />
-    <ClInclude Include="source\mappers\jsonMapper.h" />
-    <ClInclude Include="source\models\requests.h" />
-    <ClInclude Include="source\models\responses.h" />
-    <ClInclude Include="source\utils\encryption.h" />
-    <ClInclude Include="source\utils\hardware.h" />
-    <ClInclude Include="source\utils\token.h" />
+    <ClInclude Include="src\helpers\bytes.h" />
+    <ClInclude Include="src\helpers\sha1.h" />
+    <ClInclude Include="src\mappers\jsonMapper.h" />
+    <ClInclude Include="src\models\requests.h" />
+    <ClInclude Include="src\models\responses.h" />
+    <ClInclude Include="src\utils\encryption.h" />
+    <ClInclude Include="src\utils\hardware.h" />
+    <ClInclude Include="src\utils\token.h" />
     <ClInclude Include="xor.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AuthLib.cpp" />
-    <ClCompile Include="source\exceptions\GenericException.h" />
-    <ClCompile Include="source\helpers\hotp.h" />
-    <ClCompile Include="source\helpers\xor.h" />
-    <ClCompile Include="source\mappers\jsonMapper.cpp" />
-    <ClCompile Include="source\models\requests.cpp" />
-    <ClCompile Include="source\models\responses.cpp" />
-    <ClCompile Include="source\utils\encryption.cpp" />
-    <ClCompile Include="source\utils\hardware.cpp" />
-    <ClCompile Include="source\utils\token.cpp" />
+    <ClCompile Include="src\exceptions\GenericException.h" />
+    <ClCompile Include="src\helpers\hotp.h" />
+    <ClCompile Include="src\helpers\xor.h" />
+    <ClCompile Include="src\mappers\jsonMapper.cpp" />
+    <ClCompile Include="src\models\requests.cpp" />
+    <ClCompile Include="src\models\responses.cpp" />
+    <ClCompile Include="src\utils\encryption.cpp" />
+    <ClCompile Include="src\utils\hardware.cpp" />
+    <ClCompile Include="src\utils\token.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Conanfile.py" />

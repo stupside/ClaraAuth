@@ -7,8 +7,16 @@
 namespace tenet {
     class PackageResponse {
     public:
-        PackageResponse() : id(0), name(""), description(""), duration(0), type(0), price(0), minQuantity(0) {}
-        PackageResponse(const int id, const std::string name, const std::string description, const int duration, const int type, const int price, const int minQuantity)
+        enum class Type {
+            Hour = 0,
+            Day = 1,
+            Month = 2,
+            Year = 3,
+            Lifetime = 4
+        };
+
+        PackageResponse() : id(0), name(""), description(""), duration(0), type(tenet::PackageResponse::Type::Day), price(0), minQuantity(0) {}
+        PackageResponse(const int id, const std::string name, const std::string description, const int duration, const tenet::PackageResponse::Type type, const int price, const int minQuantity)
             : id(id), name(name), description(description), duration(duration), type(type), price(price), minQuantity(minQuantity)
         {}
     public:
@@ -16,20 +24,27 @@ namespace tenet {
         const std::string name;
         const std::string description;
         const int duration;
-        const int type;
+        const tenet::PackageResponse::Type type;
         const int price;
         const int minQuantity;
     };
 
     class ProductResponse {
     public:
-        ProductResponse() : id(0), status(0), name(""), download(""), description(""), version(""), image("") {}
-        ProductResponse(const int id, const int status, const std::string name, const std::string download, const std::string description, const std::string version, const std::string image) 
+        enum class Status {
+            Unedetected = 0,
+            Uncertain = 1,
+            Detected = 2,
+            Maintenance = 3
+        };
+
+        ProductResponse() : id(0), status(tenet::ProductResponse::Status::Maintenance), name(""), download(""), description(""), version(""), image("") {}
+        ProductResponse(const int id, const tenet::ProductResponse::Status status, const std::string name, const std::string download, const std::string description, const std::string version, const std::string image)
             : id(id), status(status), name(name), download(download), description(description), version(version), image(image)
         {}
     public:
         const int id;
-        const int status;
+        const tenet::ProductResponse::Status status;
         const std::string name;
         const std::string download;
         const std::string description;
@@ -60,7 +75,14 @@ namespace tenet {
 
     class LicenseKeyResponse {
     public:
-        LicenseKeyResponse() : id(0), key("default"), hwid(""), generation(""), status(0), creation(""), activation(""), expiration(""),
+        enum class Status {
+            Active = 0,
+            Inactive = 1,
+            Paused = 2,
+            Expired = 3
+        };
+
+        LicenseKeyResponse() : id(0), key("default"), hwid(""), generation(""), status(tenet::LicenseKeyResponse::Status::Inactive), creation(""), activation(""), expiration(""),
             extension(tenet::LicenseKeyExtensionResponse()), package(tenet::PackageResponse()), product(tenet::ProductResponse()), owner(tenet::ApplicationUserResponse()), creator(tenet::ApplicationUserResponse())
         {}
 
@@ -68,7 +90,7 @@ namespace tenet {
             const std::string key,
             const std::string hwid,
             const std::string generation,
-            const int status,
+            const tenet::LicenseKeyResponse::Status status,
             const std::string creation,
             const std::string activation,
             const std::string expiration,
@@ -82,7 +104,7 @@ namespace tenet {
         const std::string key;
         const std::string hwid;
         const std::string generation;
-        const int status;
+        const tenet::LicenseKeyResponse::Status status;
         const std::string creation;
         const std::string activation;
         const std::string expiration;

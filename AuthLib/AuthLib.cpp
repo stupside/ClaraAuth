@@ -2,12 +2,12 @@
 
 #include "xor.h"
 
-#include "source/exceptions/GenericException.h"
+#include "src/exceptions/GenericException.h"
 
-#include "source/utils/hardware.h"
-#include "source/utils/token.h"
-#include "source/utils/encryption.h"
-#include "source/mappers/jsonMapper.h"
+#include "src/utils/hardware.h"
+#include "src/utils/token.h"
+#include "src/utils/encryption.h"
+#include "src/mappers/jsonMapper.h"
 
 #include <nlohmann/json.hpp>
 #include <cpr/cpr.h>
@@ -18,7 +18,7 @@ using nlohmann::json;
 #if defined _DEBUG 
 #define AUTH_ENDPOINT ((std::string) _xor_("http://localhost:56494/v3/licensekey/process"))
 #else 
-#define AUTH_ENDPOINT ((std::string) _xor_("http://api.tenet.ooo/v3/licensekeys/process"))
+#define AUTH_ENDPOINT ((std::string) _xor_("http://api.tenet.ooo/v3/licensekey/process"))
 #endif
 
 #define AUTH_ISSUER ((std::string) _xor_("Tenet_Client"))

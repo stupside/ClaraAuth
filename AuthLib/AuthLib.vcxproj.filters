@@ -21,28 +21,28 @@
     <ClInclude Include="xor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\models\responses.h">
+    <ClInclude Include="src\helpers\bytes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\models\requests.h">
+    <ClInclude Include="src\helpers\sha1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\mappers\jsonMapper.h">
+    <ClInclude Include="src\mappers\jsonMapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\utils\encryption.h">
+    <ClInclude Include="src\models\requests.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\utils\hardware.h">
+    <ClInclude Include="src\models\responses.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\helpers\sha1.h">
+    <ClInclude Include="src\utils\encryption.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\helpers\bytes.h">
+    <ClInclude Include="src\utils\hardware.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\utils\token.h">
+    <ClInclude Include="src\utils\token.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -50,31 +50,31 @@
     <ClCompile Include="AuthLib.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\models\responses.cpp">
+    <ClCompile Include="src\exceptions\GenericException.h">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\models\requests.cpp">
+    <ClCompile Include="src\helpers\hotp.h">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\mappers\jsonMapper.cpp">
+    <ClCompile Include="src\helpers\xor.h">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\utils\encryption.cpp">
+    <ClCompile Include="src\mappers\jsonMapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\utils\hardware.cpp">
+    <ClCompile Include="src\models\requests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\helpers\hotp.h">
+    <ClCompile Include="src\models\responses.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\helpers\xor.h">
+    <ClCompile Include="src\utils\encryption.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\utils\token.cpp">
+    <ClCompile Include="src\utils\hardware.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\exceptions\GenericException.h">
+    <ClCompile Include="src\utils\token.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

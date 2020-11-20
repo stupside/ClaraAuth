@@ -4,7 +4,7 @@
 #include <iostream>
 
 #pragma region secret
-    #define PRODUCT_CODE ((std::string)"a7b34de66a5c4e85b4596b85123675d2")
+    #define PRODUCT_CODE ((std::string)"2897a71d64c845c4a36522ca07840ec9")
 #pragma endregion
 
 int main()

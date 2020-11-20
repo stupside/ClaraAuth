@@ -1,4 +1,4 @@
-#include "../models/responses.h"
+#include "responses.h"
 
 const bool tenet::Response::Succeed()
 {

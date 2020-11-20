@@ -1,4 +1,4 @@
-#include "../utils/encryption.h"
+#include "encryption.h"
 
 #include <windows.h>
 

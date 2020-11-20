@@ -5,7 +5,7 @@
 #include <string>
 #include <stdio.h>
 
-#include "source/models/responses.h"
+#include "src/models/responses.h"
 
 namespace tenet {
 

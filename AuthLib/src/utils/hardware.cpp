@@ -1,8 +1,9 @@
 #pragma warning (disable: 4474)
 #pragma warning (disable: 4172)
+#pragma warning (disable : 4996)
 #define _WIN32_WINNT 0x0500
 
-#include "../utils/hardware.h"
+#include "hardware.h"
 
 #include "encryption.h"
 

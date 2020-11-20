@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cstdint>
 
-#include "../helpers/sha1.h"
+#include "sha1.h"
 
 /*
 	 * The 64-bit-blocksize variant of HMAC-SHA1.

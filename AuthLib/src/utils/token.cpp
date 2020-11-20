@@ -2,7 +2,7 @@
 
 #include "../helpers/hotp.h"
 #include "../exceptions/GenericException.h"
-#include "../utils/encryption.h"
+#include "encryption.h"
 
 #include <cppcodec/base64_rfc4648.hpp>
 #include <cppcodec/base32_rfc4648.hpp>
