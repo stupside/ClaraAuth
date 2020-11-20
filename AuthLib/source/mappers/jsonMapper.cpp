@@ -44,6 +44,8 @@ tenet::LicenseKeyResponse ResponseMapper::mapToLicenseKeyResponse(nlohmann::json
 	tenet::ApplicationUserResponse owner = mapToApplicationUserResponse(JsonObject["Owner"]);
 	tenet::ApplicationUserResponse creator = mapToApplicationUserResponse(JsonObject["Creator"]);
 
+	tenet::LicenseKeyExtensionResponse extension = tenet::LicenseKeyExtensionResponse(getString(JsonObject["Extension"]["Customer"]), getString(JsonObject["Extension"]["Notes"]));
+
 	tenet::LicenseKeyResponse response = tenet::LicenseKeyResponse(JsonObject["Id"].get<int>(),
 		JsonObject["Key"].get<std::string>(),
 		JsonObject["Hwid"].get<std::string>(),
@@ -52,6 +54,7 @@ tenet::LicenseKeyResponse ResponseMapper::mapToLicenseKeyResponse(nlohmann::json
 		JsonObject["Creation"].get<std::string>(),
 		JsonObject["Activation"].get<std::string>(),
 		JsonObject["Expiration"].get<std::string>(),
+		extension,
 		package,
 		product,
 		owner,

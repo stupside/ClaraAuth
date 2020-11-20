@@ -15,6 +15,7 @@
 #include <atlbase.h>
 #include <Wbemidl.h>
 #include <codecvt>
+
 #include <comdef.h>
 
 #include <future>

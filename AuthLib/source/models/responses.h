@@ -48,10 +48,20 @@ namespace tenet {
         const std::string userName;
     };
 
+    class LicenseKeyExtensionResponse {
+    public:
+        LicenseKeyExtensionResponse() : customer(""), notes("") {}
+        LicenseKeyExtensionResponse(const std::string customer, const std::string notes)
+            : customer(customer), notes(notes) {}
+    public:
+        const std::string customer;
+        const std::string notes;
+    };
+
     class LicenseKeyResponse {
     public:
         LicenseKeyResponse() : id(0), key("default"), hwid(""), generation(""), status(0), creation(""), activation(""), expiration(""),
-            package(tenet::PackageResponse()), product(tenet::ProductResponse()), owner(tenet::ApplicationUserResponse()), creator(tenet::ApplicationUserResponse())
+            extension(tenet::LicenseKeyExtensionResponse()), package(tenet::PackageResponse()), product(tenet::ProductResponse()), owner(tenet::ApplicationUserResponse()), creator(tenet::ApplicationUserResponse())
         {}
 
         LicenseKeyResponse(const int id,
@@ -62,12 +72,12 @@ namespace tenet {
             const std::string creation,
             const std::string activation,
             const std::string expiration,
+            const tenet::LicenseKeyExtensionResponse extension,
             const PackageResponse package, const ProductResponse product, const ApplicationUserResponse owner, const ApplicationUserResponse creator)
             : id(id), key(key), hwid(hwid), generation(generation), status(status), creation(creation), activation(activation), expiration(expiration),
-            package(package), product(product), owner(owner), creator(creator)
+            extension(extension), package(package), product(product), owner(owner), creator(creator)
         {}
     public:
-
         const int id;
         const std::string key;
         const std::string hwid;
@@ -76,6 +86,8 @@ namespace tenet {
         const std::string creation;
         const std::string activation;
         const std::string expiration;
+
+        const LicenseKeyExtensionResponse extension;
 
         const PackageResponse package;
         const ProductResponse product;
