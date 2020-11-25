@@ -24,4 +24,4 @@ if(CONAN_LINK_RUNTIME_MULTI)
     endforeach()
 endif()
 
-##add_library(AuthLib STATIC AuthLib.cpp)
+add_library(AuthLib STATIC AuthLib.cpp)

@@ -2,6 +2,8 @@
 
 #include "xor.h"
 
+#include "src/utils/logging.h"
+
 #include "src/exceptions/GenericException.h"
 
 #include "src/utils/hardware.h"
@@ -26,6 +28,13 @@ using nlohmann::json;
 #define AUTH_EXPIRY ((int) 15)
 
 namespace tenet {
+
+	void Auth::with_debug(std::string path)
+	{
+		debug = true;
+		debug_path = path;
+	}
+
 	void Auth::with_custom_hwid(std::string custom_hwid) {
 		if (!init)
 			throw GenericException("Auth not initialized");
@@ -40,25 +49,34 @@ namespace tenet {
 		hwid_options.sort();
 		hwid_options.unique();
 
-		std::string hwid1 = Hardware::get_computer_sid();
-		std::string hwid2;
-
+		std::string tmp_hwid;
 		if (!hwid_options.empty())
 		{
-			for (HwidOption& HwidOption : hwid_options) {
-				switch (HwidOption) {
-				case HwidOption::Base_Board:
-					hwid2 += Hardware::get_base_board();
-				case HwidOption::Computer_Name:
-					hwid2 += Hardware::get_computer_name();
-				case HwidOption::Physical_Memory:
-					hwid2 += Hardware::get_physical_memory();
-				case HwidOption::Username:
-					hwid2 += Hardware::get_username();
+			for (HwidOption& option : hwid_options) {
+				switch (option) {
+					case HwidOption::Base_Board:
+						tmp_hwid += Hardware::get_base_board();
+						break;
+					case HwidOption::Computer_Name:
+						tmp_hwid += Hardware::get_computer_name();
+						break;
+					case HwidOption::Physical_Memory:
+						tmp_hwid += Hardware::get_physical_memory();
+						break;
+					case HwidOption::Username:
+						tmp_hwid += Hardware::get_username();
+						break;
+					default:
+						break;
 				}
 			}
 		}
-		hwid = Encryption::sha256((hwid2.empty() ? "" : "." + Encryption::sha256(hwid2)));
+		else {
+			tmp_hwid = "";
+		}
+
+		tmp_hwid = Encryption::sha256(tmp_hwid) + Encryption::sha256(Hardware::get_computer_sid());
+		hwid = Encryption::sha256(tmp_hwid);
 	}
 
 	void Auth::with_variables(std::list<std::string> variables) {
@@ -75,9 +93,25 @@ namespace tenet {
 	}
 
 	tenet::Response Auth::process(std::string key) {
+		
+		Logging logging;
+
+		if (debug)
+		{
+			logging = Logging::Logging(debug_path, "tenet_process", "txt");
+		}
+
+		if (key.empty())
+		{
+			if (debug) { logging.log("Empty key"); }
+			throw GenericException("Empty key");
+		}
 
 		if (!init)
+		{
+			if (debug) { logging.log("The auth wasn't initialized"); }
 			throw GenericException("Auth not initialized");
+		}
 
 		json object;
 		object[_xor_("client")][_xor_("variables")] = requested_variables;
@@ -103,7 +137,25 @@ namespace tenet {
 		std::cout << "reason: " << req.reason << std::endl;
 		#endif
 
-		if (req.status_code != 200) {
+		if (req.status_code == 429) {
+			logging.log(
+				"code: " + std::to_string(req.status_code) +
+				"text: " + req.text +
+				"message: " + req.error.message +
+				"reason" + req.reason
+			);
+			return tenet::Response(req.text.empty() ? (req.reason.empty() ? "Rate limited" : req.reason) : req.text);
+		}
+		else if (req.status_code != 200) {
+			if (debug) {
+				logging.log("API errored");
+				logging.log(
+					"code: " + std::to_string(req.status_code) +
+					"text: " + req.text +
+					"message: " + req.error.message +
+					"reason" + req.reason
+				);
+			}
 			return tenet::Response(req.text.empty() ? "The API can't be reached" : req.text);
 		}
 		
@@ -112,14 +164,20 @@ namespace tenet {
 		 	data = Token::verify(req.text, product_code);
 		}
 		catch(GenericException ex){
+			if (debug) {
+				logging.log("Generic error thrown");
+				logging.log(ex.what());
+			}
 			return tenet::Response(ex.what());
 		}
 
 		if (data.empty())
+		{
+			if (debug) { logging.log("Data set was empty"); }
 			return tenet::Response("Empty data set");
+		}
 
 		json datas = json::parse(data);
-
 		json json_licenseKey = datas["LicenseKey"];
 		json json_variables = datas["Variables"];
 

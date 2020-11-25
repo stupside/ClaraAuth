@@ -18,14 +18,21 @@ namespace tenet {
 
 	class Auth {
 	private:
+
 		bool init = false;
+
+		bool debug = false;
+		std::string debug_path;
+
 		std::string hwid;
 
 		std::list<std::string> requested_variables;
 		const std::string product_code;
 
 	public:
-		Auth(std::string product_code) : product_code(product_code), init(true) { }
+		Auth(std::string product_code, bool debug = false) : product_code(product_code), init(true), debug(debug) {};
+
+		void with_debug(std::string path = "");
 
 		void with_custom_hwid(std::string custom_hwid);
 		void with_hwid(std::list<HwidOption> hwid_options = std::list<HwidOption>());

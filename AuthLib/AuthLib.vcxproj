@@ -172,6 +172,7 @@
     <ClInclude Include="src\models\responses.h" />
     <ClInclude Include="src\utils\encryption.h" />
     <ClInclude Include="src\utils\hardware.h" />
+    <ClInclude Include="src\utils\logging.h" />
     <ClInclude Include="src\utils\token.h" />
     <ClInclude Include="xor.h" />
   </ItemGroup>
@@ -185,6 +186,7 @@
     <ClCompile Include="src\models\responses.cpp" />
     <ClCompile Include="src\utils\encryption.cpp" />
     <ClCompile Include="src\utils\hardware.cpp" />
+    <ClCompile Include="src\utils\logging.cpp" />
     <ClCompile Include="src\utils\token.cpp" />
   </ItemGroup>
   <ItemGroup>

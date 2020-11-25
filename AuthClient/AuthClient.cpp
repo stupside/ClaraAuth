@@ -9,10 +9,12 @@
 
 int main()
 {
-    tenet::Auth auth(PRODUCT_CODE);
+    tenet::Auth auth(PRODUCT_CODE, true);
 
     std::list<tenet::HwidOption> options 
         = { tenet::HwidOption::Physical_Memory, tenet::HwidOption::Computer_Name, tenet::HwidOption::Base_Board, tenet::HwidOption::Username };
+
+    auth.with_debug("");
 
     auth.with_hwid(options);
     auth.with_variables({ "var1", "var2" });

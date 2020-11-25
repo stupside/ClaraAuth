@@ -1,5 +1,7 @@
 from conans import ConanFile, CMake
 
+#conan install . --install-folder .\conan\
+
 class TenetAuth(ConanFile):
     name = "ClaraAuth"
     version = "0.1"
@@ -19,25 +21,10 @@ class TenetAuth(ConanFile):
 
     def configure(self):
         self.options["libcurl"].with_ssl = "openssl"
-
-    # Alternative 2: if you want to keep MD-MDd/MT-MTd configuration
-    def package_id(self):
         if self.settings.compiler == "Visual Studio":
-            if "MD" in self.settings.compiler.runtime:
-                self.info.settings.compiler.runtime = "MD/MDd"
-            else:
-                self.info.settings.compiler.runtime = "MT/MTd"
+            del self.settings.compiler.runtime
 
     def build(self):
-        # Alternative 1: Use always default runtime (MD/MDd)
-        cmake_release = CMake(self, build_type="Debug")
-        cmake_release.defintions["CONAN_LINK_RUNTIME_MULTI"] = cmake_release.definitions["CONAN_LINK_RUNTIME"]
-        cmake_release.definitions["CONAN_LINK_RUNTIME"] = False
-        cmake_release.configure()
-        cmake_release.build()
-
-        cmake_debug = CMake(self, build_type="Release")
-        cmake_debug.defintions["CONAN_LINK_RUNTIME_MULTI"] = cmake_release.definitions["CONAN_LINK_RUNTIME"]
-        cmake_debug.definitions["CONAN_LINK_RUNTIME"] = False
-        cmake_debug.configure()
-        cmake_debug.build()
+      cmake = CMake(self)
+      cmake.configure()
+      cmake.build()
