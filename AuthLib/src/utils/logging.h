@@ -1,5 +1,5 @@
 #include <string>
-#include <fstream>
+
 
 class Logging {
 private:
@@ -11,9 +11,9 @@ public:
 
 	Logging() = default;
 
-	Logging(std::string file_path, std::string file_name, std::string extension);
+	Logging(std::string file_path);
 
 	void log(const std::string message);
 
-	~Logging() { }
+	~Logging() {  }
 };

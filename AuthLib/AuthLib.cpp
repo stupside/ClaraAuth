@@ -26,6 +26,7 @@ using nlohmann::json;
 #define AUTH_ISSUER ((std::string) _xor_("Tenet_Client"))
 #define AUTH_AUDIENCE ((std::string) _xor_("Tenet"))
 #define AUTH_EXPIRY ((int) 15)
+#define MAX_ATTEMPTS ((int) 10)
 
 namespace tenet {
 
@@ -92,13 +93,13 @@ namespace tenet {
 		requested_variables = variables;
 	}
 
-	tenet::Response Auth::process(std::string key) {
-		
+	tenet::Response Auth::process(std::string key, int attempts) {
+		Sleep(2);
 		Logging logging;
 
 		if (debug)
 		{
-			logging = Logging::Logging(debug_path, "tenet_process", "txt");
+			logging = Logging::Logging(debug_path);
 		}
 
 		if (key.empty())
@@ -117,6 +118,12 @@ namespace tenet {
 		object[_xor_("client")][_xor_("variables")] = requested_variables;
 		object[_xor_("client")][_xor_("hwid")] = hwid;
 
+		if (attempts > MAX_ATTEMPTS)
+			attempts = MAX_ATTEMPTS;
+
+		if (attempts < 1)
+			attempts = 1;
+
 		std::string token = Token::generate(object, product_code);
 
 		cpr::AsyncResponse  fr = cpr::PostAsync(
@@ -128,35 +135,34 @@ namespace tenet {
 			}
 		);
 
-		cpr::Response req = fr.get();
+		cpr::Response req;
+		req = fr.get();
 
 		#if defined _DEBUG 
-		std::cout << "text: " << req.text << std::endl;
-		std::cout << "status_code: "<< req.status_code << std::endl;
-		std::cout << "message: " << req.error.message << std::endl;
-		std::cout << "reason: " << req.reason << std::endl;
+			std::cout << "text: " << req.text << std::endl;
+			std::cout << "status_code: " << req.status_code << std::endl;
+			std::cout << "message: " << req.error.message << std::endl;
+			std::cout << "reason: " << req.reason << std::endl;
 		#endif
+		
+		if (req.status_code != 200 && req.status_code != 400 && req.status_code != 403 && attempts > 1)
+			return Auth::process(key, --attempts);
 
-		if (req.status_code == 429) {
-			logging.log(
-				"code: " + std::to_string(req.status_code) +
-				"text: " + req.text +
-				"message: " + req.error.message +
-				"reason" + req.reason
-			);
-			return tenet::Response(req.text.empty() ? (req.reason.empty() ? "Rate limited" : req.reason) : req.text);
-		}
-		else if (req.status_code != 200) {
+		if (req.status_code != 200) {
 			if (debug) {
-				logging.log("API errored");
 				logging.log(
-					"code: " + std::to_string(req.status_code) +
-					"text: " + req.text +
-					"message: " + req.error.message +
-					"reason" + req.reason
+					"[" + req.reason + " " + std::to_string(req.status_code) + "]" +
+					" text: " + req.text +
+					" message: " + req.error.message
 				);
 			}
-			return tenet::Response(req.text.empty() ? "The API can't be reached" : req.text);
+
+			if (req.status_code == 429) {
+				return tenet::Response(req.text.empty() ? (req.reason.empty() ? "Rate limited" : req.reason) : req.text);
+			}
+			else {
+				return tenet::Response(req.text.empty() ? "The API can't be reached" : req.text);
+			}
 		}
 		
 		std::string data;
@@ -165,16 +171,29 @@ namespace tenet {
 		}
 		catch(GenericException ex){
 			if (debug) {
-				logging.log("Generic error thrown");
 				logging.log(ex.what());
 			}
-			return tenet::Response(ex.what());
+
+			if (attempts > 1)
+			{
+				return Auth::process(key, --attempts);
+			}
+			else {
+				return tenet::Response(ex.what());
+			}
 		}
 
 		if (data.empty())
 		{
 			if (debug) { logging.log("Data set was empty"); }
-			return tenet::Response("Empty data set");
+
+			if (attempts > 1)
+			{
+				return Auth::process(key, --attempts);
+			}
+			else {
+				return tenet::Response("Empty data set");
+			}
 		}
 
 		json datas = json::parse(data);
@@ -193,7 +212,6 @@ namespace tenet {
 				}
 			}
 		}
-
 		return *response;
 	}
 }

@@ -11,10 +11,10 @@ int main()
 {
     tenet::Auth auth(PRODUCT_CODE, true);
 
-    std::list<tenet::HwidOption> options 
+    std::list<tenet::HwidOption> options
         = { tenet::HwidOption::Physical_Memory, tenet::HwidOption::Computer_Name, tenet::HwidOption::Base_Board, tenet::HwidOption::Username };
 
-    auth.with_debug("");
+    auth.with_debug("C:/Users/Loading/tenet.log");
 
     auth.with_hwid(options);
     auth.with_variables({ "var1", "var2" });
@@ -22,7 +22,7 @@ int main()
     std::string key;
     std::cout << "Enter a key : "; std::cin >> key;
 
-    tenet::Response response = auth.process(key);
+    tenet::Response response = auth.process(key, 2);
 
     if (response.Succeed())
     {

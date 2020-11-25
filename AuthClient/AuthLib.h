@@ -19,9 +19,9 @@ namespace tenet {
 	class Auth {
 	private:
 
-		bool init = false;
+		bool init;
 
-		bool debug = false;
+		bool debug;
 		std::string debug_path;
 
 		std::string hwid;
@@ -30,7 +30,8 @@ namespace tenet {
 		const std::string product_code;
 
 	public:
-		Auth(std::string product_code, bool debug = false) : product_code(product_code), init(true), debug(debug) {};
+
+		Auth(std::string product_code) : product_code(product_code), init(true), debug(false) {};
 
 		void with_debug(std::string path = "");
 
@@ -39,9 +40,9 @@ namespace tenet {
 
 		void with_variables(std::list<std::string> variables);
 
-		tenet::Response process(std::string key);
+		tenet::Response process(std::string key, int attempts = 1);
 
-		~Auth(void) { }
+		~Auth() { }
 	};
 }
 #endif

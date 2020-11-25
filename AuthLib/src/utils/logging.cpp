@@ -1,38 +1,33 @@
 #include "logging.h"
 
+#include <fstream>
 #include <iostream>
-#include <stdlib.h>
-#include <stdio.h>
-#include <algorithm>
 
 std::string Logging::get_time() {
 	return "LOG";
 };
 
-Logging::Logging(std::string file_path, std::string file_name, std::string extension) {
+Logging::Logging(std::string file_path) {
 	if (file_path.empty())
 	{
 		path = getenv("APPDATA");
+		path = path.append("/Tenet_Auth/auth.log");
 	}
 	else {
 		path = file_path;
 	}
 
-	if (file_name.empty())
-		full_name = "default";
-
-	full_name = file_name + "." + extension;
-
-	std::replace(full_name.begin(), full_name.end(), ' ', '_');
-
-	std::cout << "Path to debug file: " << path << full_name << std::endl;
+	std::cout << "Path to debug file: " << path << std::endl;
 };
 
 void Logging::log(const std::string message) {
+	std::ofstream file;
+	file.open(path, std::ios_base::app);
 
-	std::ofstream file = std::ofstream(path+full_name);
+	if (file.fail())
+		return;
 
-	file << "[ " << id++ << " ] [ " << get_time() << " ] " << message << "\n";
+	file << "[" << id++ << "][" << get_time() << "] " << message << "\n";
 
 	file.close();
 }
