@@ -9,35 +9,34 @@
 
 int main()
 {
-    tenet::Auth auth(PRODUCT_CODE, true);
+    tenet::Auth auth(PRODUCT_CODE);
 
-    std::list<tenet::HwidOption> options
-        = { tenet::HwidOption::Physical_Memory, tenet::HwidOption::Computer_Name, tenet::HwidOption::Base_Board, tenet::HwidOption::Username };
+    // Make sure ot have rw access to the path
+    //auth.with_debug("C:/Somewhere/tenet.log");
 
-    auth.with_debug("C:/Users/Loading/tenet.log");
-
+    // auth.with_custom_hwid("custom_hwid");
+    // OR
+    std::list<tenet::HwidOption> options = { 
+        tenet::HwidOption::Physical_Memory,
+        tenet::HwidOption::Base_Board
+    };
     auth.with_hwid(options);
-    auth.with_variables({ "var1", "var2" });
+
+    //auth.with_variables({ "var1", "var2" });
 
     std::string key;
     std::cout << "Enter a key : "; std::cin >> key;
 
-    tenet::Response response = auth.process(key, 2);
+    tenet::Response response = auth.process(key, 10);
 
     if (response.Succeed())
     {
-        std::cout << "product: " << response.licenseKey->product.name << std::endl;
-        std::cout << "package: " << response.licenseKey->package.name << std::endl;
         std::cout << "expiration: " << response.licenseKey->expiration << std::endl;
-
-        for (auto& e : response.Variables()) {
-            std::cout << e.first << " = " << e.second << std::endl;
-        }
+        // response.Variables()
     }
     else {
         std::cout << response.Message() << std::endl;
     }
 
-    Sleep(60000);
     return 0;
 }

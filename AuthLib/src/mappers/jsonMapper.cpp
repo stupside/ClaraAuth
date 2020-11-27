@@ -64,7 +64,4 @@ tenet::LicenseKeyResponse ResponseMapper::mapToLicenseKeyResponse(nlohmann::json
 
 	return response;
 }
-
-
-
 #endif
