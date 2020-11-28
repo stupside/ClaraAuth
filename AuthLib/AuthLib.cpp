@@ -18,7 +18,7 @@
 using nlohmann::json;
 
 #if defined _DEBUG 
-#define AUTH_ENDPOINT ((std::string) _xor_("http://localhost:56494/v3/licensekey/process"))
+#define AUTH_ENDPOINT ((std::string) _xor_("http://api.tenet.ooo/v3/licensekey/process"))
 #else 
 #define AUTH_ENDPOINT ((std::string) _xor_("http://api.tenet.ooo/v3/licensekey/process"))
 #endif
@@ -94,7 +94,7 @@ namespace tenet {
 	}
 
 	tenet::Response Auth::process(std::string key, int attempts) {
-		Sleep(2);
+		Sleep(5);
 		Logging logging;
 
 		if (debug)
@@ -144,9 +144,18 @@ namespace tenet {
 			std::cout << "message: " << req.error.message << std::endl;
 			std::cout << "reason: " << req.reason << std::endl;
 		#endif
+
+		if(req.status_code == 449)
+		{
+			if (attempts > 1)
+			{
+				return Auth::process(key, --attempts);
+			}
+			else {
+				return tenet::Response(req.text.empty() ? "Max attempts reached" : req.text);
+			}
+		}
 		
-		if (req.status_code != 200 && req.status_code != 400 && req.status_code != 403 && attempts > 1)
-			return Auth::process(key, --attempts);
 
 		if (req.status_code != 200) {
 			if (debug) {

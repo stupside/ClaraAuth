@@ -12,7 +12,7 @@ int main()
     tenet::Auth auth(PRODUCT_CODE);
 
     // Make sure ot have rw access to the path
-    //auth.with_debug("C:/Somewhere/tenet.log");
+    auth.with_debug();
 
     // auth.with_custom_hwid("custom_hwid");
     // OR
