@@ -4,6 +4,7 @@
 
 #include "src/utils/logging.h"
 
+#include "src/exceptions/EmptyKeyException.h"
 #include "src/exceptions/GenericException.h"
 
 #include "src/utils/hardware.h"
@@ -18,14 +19,13 @@
 using nlohmann::json;
 
 #if defined _DEBUG 
-#define AUTH_ENDPOINT ((std::string) _xor_("http://api.tenet.ooo/v3/licensekey/process"))
+#define AUTH_ENDPOINT ((std::string) _xor_("http://localhost:5004/licensekey/authenticate"))
 #else 
 #define AUTH_ENDPOINT ((std::string) _xor_("http://api.tenet.ooo/v3/licensekey/process"))
 #endif
 
 #define AUTH_ISSUER ((std::string) _xor_("Tenet_Client"))
 #define AUTH_AUDIENCE ((std::string) _xor_("Tenet"))
-#define AUTH_EXPIRY ((int) 15)
 #define MAX_ATTEMPTS ((int) 10)
 
 namespace tenet {
@@ -94,8 +94,16 @@ namespace tenet {
 	}
 
 	tenet::Response Auth::process(std::string key, int attempts) {
-		Sleep(5);
 		Logging logging;
+		if (attempts > MAX_ATTEMPTS)
+			attempts = MAX_ATTEMPTS;
+
+		if(attempts == 0)
+			return tenet::Response("Max attempts reached");
+		
+		--attempts;
+
+		Sleep(2000);
 
 		if (debug)
 		{
@@ -105,7 +113,7 @@ namespace tenet {
 		if (key.empty())
 		{
 			if (debug) { logging.log("Empty key"); }
-			throw GenericException("Empty key");
+			throw EmptyKeyException("License Key was empty");
 		}
 
 		if (!init)
@@ -118,17 +126,11 @@ namespace tenet {
 		object[_xor_("client")][_xor_("variables")] = requested_variables;
 		object[_xor_("client")][_xor_("hwid")] = hwid;
 
-		if (attempts > MAX_ATTEMPTS)
-			attempts = MAX_ATTEMPTS;
-
-		if (attempts < 1)
-			attempts = 1;
-
 		std::string token = Token::generate(object, product_code);
 
 		cpr::AsyncResponse  fr = cpr::PostAsync(
 			cpr::Url{ AUTH_ENDPOINT },
-			cpr::Header{ { _xor_("accept"), _xor_("application/json")} },
+			cpr::Header{ { _xor_("accept"), _xor_("application/json")}, { _xor_("TN-Key"), key.c_str()} },
 			cpr::Parameters{
 				{ _xor_("token"), token.c_str() },
 				{ _xor_("key"), key.c_str() }
@@ -145,19 +147,12 @@ namespace tenet {
 			std::cout << "reason: " << req.reason << std::endl;
 		#endif
 
-		if(req.status_code == 449)
-		{
-			if (attempts > 1)
-			{
-				return Auth::process(key, --attempts);
-			}
-			else {
-				return tenet::Response(req.text.empty() ? "Max attempts reached" : req.text);
-			}
-		}
+		if(req.status_code == 449 && attempts > 0)
+			return Auth::process(key, attempts);
 		
 
 		if (req.status_code != 200) {
+
 			if (debug) {
 				logging.log(
 					"[" + req.reason + " " + std::to_string(req.status_code) + "]" +
@@ -168,6 +163,9 @@ namespace tenet {
 
 			if (req.status_code == 429) {
 				return tenet::Response(req.text.empty() ? (req.reason.empty() ? "Rate limited" : req.reason) : req.text);
+			}
+			else if(req.status_code == 520){
+				return Auth::process(key, attempts); // 520 => CF error we try again by default
 			}
 			else {
 				return tenet::Response(req.text.empty() ? "The API can't be reached" : req.text);
@@ -183,9 +181,9 @@ namespace tenet {
 				logging.log(ex.what());
 			}
 
-			if (attempts > 1)
+			if (attempts > 0)
 			{
-				return Auth::process(key, --attempts);
+				return Auth::process(key, attempts);
 			}
 			else {
 				return tenet::Response(ex.what());
@@ -196,7 +194,7 @@ namespace tenet {
 		{
 			if (debug) { logging.log("Data set was empty"); }
 
-			if (attempts > 1)
+			if (attempts > 0)
 			{
 				return Auth::process(key, --attempts);
 			}
@@ -221,6 +219,10 @@ namespace tenet {
 				}
 			}
 		}
+
+		this->success = true;
+		this->key = key;
+
 		return *response;
 	}
 }

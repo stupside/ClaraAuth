@@ -11,7 +11,7 @@
 
 #define AUTH_ISSUER ((std::string) "Tenet_Client")
 #define AUTH_AUDIENCE ((std::string) "Tenet")
-#define AUTH_EXPIRY ((int) 15)
+#define AUTH_EXPIRY ((int) 60)
 
 std::string Token::verify(std::string token, std::string code)
 {
