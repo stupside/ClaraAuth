@@ -3,7 +3,7 @@
 #include <iostream>
 
 #pragma region secret
-    #define PRODUCT_CODE ((std::string)"b3f6cec1ea2a4755b2b31bc126b75c71")
+    #define PRODUCT_CODE ((std::string)"2897a71d64c845c4a36522ca07840ec9")
 #pragma endregion
 
 int main()
@@ -11,7 +11,7 @@ int main()
     tenet::Auth auth(PRODUCT_CODE);
 
     // Make sure ot have rw access to the path
-    auth.with_debug();
+    //auth.with_debug();
 
     // auth.with_custom_hwid("custom_hwid");
     // OR
@@ -26,7 +26,7 @@ int main()
 
     std::string key;
     std::cout << "Enter a key : "; std::cin >> key;
-    key = "83D9E624-0F91-4DA5-BDCA-B40BA5DB1FCB";
+    //key = "83D9E624-0F91-4DA5-BDCA-B40BA5DB1FCB";
     tenet::Response response = auth.process(key, 10);
 
     if (response.Succeed())

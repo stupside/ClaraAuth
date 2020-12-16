@@ -98,6 +98,8 @@ namespace tenet {
 		if (attempts > MAX_ATTEMPTS)
 			attempts = MAX_ATTEMPTS;
 
+		this->key = key;
+
 		if(attempts == 0)
 			return tenet::Response("Max attempts reached");
 		
@@ -196,7 +198,7 @@ namespace tenet {
 
 			if (attempts > 0)
 			{
-				return Auth::process(key, --attempts);
+				return Auth::process(key, attempts);
 			}
 			else {
 				return tenet::Response("Empty data set");
@@ -221,7 +223,6 @@ namespace tenet {
 		}
 
 		this->success = true;
-		this->key = key;
 
 		return *response;
 	}
