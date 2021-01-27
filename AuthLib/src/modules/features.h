@@ -168,8 +168,8 @@ namespace features {
 		explicit Response(const std::string message) : _succeed(false), _message(message) {};
 		explicit Response(bool succeed, const std::string message) : _succeed(succeed), _message(message) {};
 	public:
-		bool succeed() { return _succeed; };
-		std::string message() { return _message; };
+		bool succeed();
+		std::string message();
 	};
 
 	class Stream : public Response {
@@ -199,7 +199,9 @@ namespace features {
 		const bool can_stream();
 		const bool authenticated();
 
-		virtual ~Authenticate() { delete variables; delete license; }
+		virtual ~Authenticate() {
+
+		}
 	protected:
 		Authenticate(std::string message) : Response(false, message), license(nullptr), variables(nullptr) {};
 		Authenticate(bool succeed, std::string message) : Response(succeed, message), license(nullptr), variables(nullptr) {};

@@ -177,7 +177,9 @@ namespace tenet {
 		/// </summary>
 		features::Stream			stream(features::Authenticate& authenticate);
 
-		~Auth() { }
+		~Auth() { 
+
+		}
 	};
 }
 #endif

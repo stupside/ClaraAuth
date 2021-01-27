@@ -137,7 +137,6 @@ namespace tenet {
 	class Auth {
 	private:
 		bool					initialized;
-		bool					authenticated;
 
 		std::string				key;
 		const std::string		code;
@@ -151,7 +150,7 @@ namespace tenet {
 		/// </summary>
 		/// <param name="product_code">Your product code</param>
 		Auth(std::string code, tenet::Configuration configuration)
-			: code(code), initialized(true), authenticated(), configuration(configuration), response() {};
+			: code(code), initialized(true), configuration(configuration), response() {};
 
 		/// <summary>
 		/// Returns true if the client can be authenticated
@@ -178,7 +177,9 @@ namespace tenet {
 		/// </summary>
 		features::Stream			stream(features::Authenticate& authenticate);
 
-		~Auth() { }
+		~Auth() {
+
+		}
 	};
 }
 #endif

@@ -12,12 +12,26 @@
 
 const bool						tenet::Auth::can_authenticate()
 {
-	return configuration.is_valid() && initialized && !code.empty() && !response->authenticated();
+
+	if (!configuration.is_valid() || initialized && code.empty())
+		return false;
+
+	if (response != nullptr)
+		return response->authenticated();
+
+	return true;
+
 }
 
 const bool						tenet::Auth::is_authenticated()
 {
-	return configuration.is_valid() && initialized && !code.empty() && response->authenticated() && !key.empty();
+	if (!configuration.is_valid() || initialized && code.empty() ||key.empty())
+		return false;
+
+	if (response == nullptr)
+		return false;
+
+	return response->authenticated();
 }
 
 features::Authenticate			tenet::Auth::authenticate(std::string key, int attempts) {

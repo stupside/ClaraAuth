@@ -32,6 +32,9 @@ namespace features {
 				const std::string id,
 				const std::string name
 			) : Entity(id), name(name) {};
+		protected:
+		private:
+			friend class Api;
 		};
 
 		class Product : public Entity<int> {
@@ -59,6 +62,9 @@ namespace features {
 				const std::string	version,
 				const std::string	image
 			) : Entity(id), status(status), name(name), download(download), description(description), version(version), image(image) {};
+		protected:
+		private:
+			friend class Api;
 		};
 
 		class Package : public Entity<int>
@@ -86,12 +92,16 @@ namespace features {
 				const Type			type,
 				const float			price
 			) : Entity(id), name(name), description(description), duration(duration), type(type), price(price) {};
+		protected:
+		private:
+			friend class Api;
 		};
 
 		class License : public Entity<int>
 		{
 		public:
 			class Extension {
+				friend class License;
 			public:
 
 				const std::string	customer;
@@ -103,6 +113,9 @@ namespace features {
 					const std::string	notes,
 					const bool			claimed
 				) : customer(customer), notes(notes), claimed(claimed) {};
+			protected:
+			private:
+				friend class Api;
 			};
 
 		public:
@@ -140,6 +153,9 @@ namespace features {
 				const User			owner,
 				const User			creator
 			) : Entity(id), key(key), hwid(hwid), status(status), creation(creation), activation(activation), expiration(expiration), product(product), package(package), owner(owner), creator(creator), extension(extension) {};
+		protected:
+		private:
+			friend class Api;
 		};
 	}
 
@@ -147,15 +163,30 @@ namespace features {
 	private:
 		const bool			_succeed;
 		const std::string	_message;
+	protected:
+		explicit Response() : _succeed(false) {};
+		explicit Response(const std::string message) : _succeed(false), _message(message) {};
+		explicit Response(bool succeed, const std::string message) : _succeed(succeed), _message(message) {};
 	public:
-		const bool succeed() { return _succeed; };
-		const std::string message() { return _message; };
+		bool succeed();
+		std::string message();
 	};
 
 	class Stream : public Response {
 	public:
 		std::string decrypt(std::string secret);
 		bool valid();
+	protected:
+		Stream(std::string message) : Response(false, message) {};
+		Stream(bool succeed, std::string message) : Response(succeed, message) {};
+		Stream(std::string encrypted, std::string iv, std::string hash)
+			: Response(true, "Stream succeed"), encrypted(encrypted), iv(iv), hash(hash) {};
+	private:
+		std::string encrypted;
+		std::string iv;
+		std::string hash;
+
+		friend class Api;
 	};
 
 	class Authenticate : public Response {
@@ -168,7 +199,19 @@ namespace features {
 		const bool can_stream();
 		const bool authenticated();
 
-		virtual ~Authenticate() { delete variables; delete license; }
+		virtual ~Authenticate() {
+
+		}
+	protected:
+		Authenticate(std::string message) : Response(false, message), license(nullptr), variables(nullptr) {};
+		Authenticate(bool succeed, std::string message) : Response(succeed, message), license(nullptr), variables(nullptr) {};
+		Authenticate(models::License* license)
+			: Response(true, "Authentication succeed"), license(license), variables(nullptr) {};
+
+
+	private:
+		std::string ist;
+		friend class Api;
 	};
 }
 

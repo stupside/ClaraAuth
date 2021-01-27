@@ -33,7 +33,7 @@ int main()
     if (!auth.is_authenticated()) // 3. Check if authenticated
         return 0;
 
-    std::cout << response.license->get_id() << std::endl;
+    std::cout << response.license->creator.name << std::endl;
 
     features::Stream stream = auth.stream(response); // 6. Stream
     if (!stream.succeed()) // 5. Check if OK 200

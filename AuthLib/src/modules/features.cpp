@@ -27,8 +27,15 @@ const bool		features::Authenticate::can_stream()
 
 const bool		features::Authenticate::authenticated()
 {
-	if (this != nullptr)
-		return false;
-
 	return this->license != nullptr && this->succeed();
+}
+
+bool features::Response::succeed()
+{
+	return _succeed;
+}
+
+std::string features::Response::message()
+{
+	return _message;
 }
