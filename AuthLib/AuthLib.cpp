@@ -24,7 +24,7 @@ features::Authenticate			tenet::Auth::authenticate(std::string key, int attempts
 	if (!can_authenticate())
 	{
 		if (configuration.debug.activated()) { Logging::log(configuration.debug.get(), "The auth wasn't ready"); }
-		throw exceptions::GenericException("Auth not initialized");
+		throw exceptions::GenericException("Auth is not initialized");
 	}
 
 	features::Authenticate* response = new features::Authenticate(Api::authenticate(
@@ -41,7 +41,7 @@ features::Authenticate			tenet::Auth::authenticate(std::string key, int attempts
 features::Stream				tenet::Auth::stream(features::Authenticate& authenticate)
 {
 	if (!is_authenticated() || !authenticate.authenticated())
-		throw exceptions::GenericException("Client not ready");
+		throw exceptions::GenericException("Client is not authenticated");
 
 	features::Stream* response = new features::Stream(Api::stream(authenticate, configuration.endpoints.stream));
 

@@ -23,32 +23,29 @@ int main()
     std::cout << "Key : "; std::cin >> key;
     key = "31376974-38E4-483C-9E31-B623BCB4C97A";
 
-    features::Authenticate response = auth.authenticate(key, 10);
-    if (response.succeed())
+    features::Authenticate response = auth.authenticate(key, 10); // 1. Authenticate
+    if (!response.succeed()) // 2. Check if OK 200
     {
-        if (!auth.is_authenticated())
-            return 0;
-
-        std::cout << response.license->get_id() << std::endl;
-    }
-    else {
         std::cout << response.message() << std::endl;
         return 0;
     }
 
-    features::Stream stream = auth.stream(response);
-    if (!stream.succeed())
+    if (!auth.is_authenticated()) // 3. Check if authenticated
+        return 0;
+
+    std::cout << response.license->get_id() << std::endl;
+
+    features::Stream stream = auth.stream(response); // 6. Stream
+    if (!stream.succeed()) // 5. Check if OK 200
     {
-        if(!stream.valid())
-            return 0;
-    }
-    else {
         std::cout << stream.message() << std::endl;
         return 0;
     }
 
+    if (!stream.valid()) // 6. Check if valid stream
+        return 0;
 
-    std::string decrypted = stream.decrypt("supersecret");
+    std::string decrypted = stream.decrypt("supersecret"); // 7. Decrypt stream
 
     return 0;
 }
