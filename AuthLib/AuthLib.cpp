@@ -43,9 +43,9 @@ features::Stream				tenet::Auth::stream(features::Authenticate& authenticate)
 	if (!is_authenticated() || !authenticate.authenticated())
 		throw exceptions::GenericException("Client not ready");
 
-	features::Stream response = Api::stream(authenticate, configuration.endpoints.stream);
+	features::Stream* response = new features::Stream(Api::stream(authenticate, configuration.endpoints.stream));
 
-	return response;
+	return *response;
 }
 
 bool							tenet::Configuration::is_valid() {

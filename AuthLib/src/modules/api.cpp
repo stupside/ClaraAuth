@@ -69,11 +69,12 @@ features::Authenticate	Api::authenticate(std::string key, std::string hwid, std:
 			}
 		}
 	}
-
+	
 	return *rep;
 }
 
 features::Stream		Api::stream(features::Authenticate authenticate, std::string endpoint, int attempts) {
+
 	cpr::Response response = post_req(endpoint,
 		cpr::Parameters{},
 		cpr::Header{
@@ -82,7 +83,7 @@ features::Stream		Api::stream(features::Authenticate authenticate, std::string e
 		});
 
 	if (response.status_code != 200 || response.text.empty())
-		throw exceptions::GenericException("Something went wrong");
+		return features::Stream("Cannot stream from server");
 
 	std::string encrypted_stream = response.text;
 	std::string iv = response.header["i"];
