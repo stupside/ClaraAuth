@@ -12,4 +12,10 @@ public:
 	static std::string decrypt(std::string message, std::string enc_key, std::string iv);
 
 	static std::string iv_key();
+
+	static std::string encrypt_routine(std::string code, std::string datas, std::string& encrypted_iv, std::string& pass);
+
+	static std::string decrypt_routine(std::string encrypted_iv, std::string encrypted_datas, std::string code, std::string pass);
+
+	static std::string pass(std::string pass);
 };

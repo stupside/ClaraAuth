@@ -1,229 +1,149 @@
 #include "AuthLib.h"
 
-#include "xor.h"
+#include "src/modules/api.h"
 
 #include "src/utils/logging.h"
 
-#include "src/exceptions/EmptyKeyException.h"
-#include "src/exceptions/GenericException.h"
+#include "src/exceptions/all_exceptions.h"
+
+#include "src/utils/encryption.h"
 
 #include "src/utils/hardware.h"
-#include "src/utils/token.h"
-#include "src/utils/encryption.h"
-#include "src/mappers/jsonMapper.h"
 
-#include <nlohmann/json.hpp>
-#include <cpr/cpr.h>
-#include <sddl.h>
+const bool						tenet::Auth::can_authenticate()
+{
+	return configuration.is_valid() && initialized && !code.empty() && !response->authenticated();
+}
 
-using nlohmann::json;
+const bool						tenet::Auth::is_authenticated()
+{
+	return configuration.is_valid() && initialized && !code.empty() && response->authenticated() && !key.empty();
+}
 
-#if defined _DEBUG 
-#define AUTH_ENDPOINT ((std::string) _xor_("http://localhost:5004/licensekey/authenticate"))
-#else 
-#define AUTH_ENDPOINT ((std::string) _xor_("http://api.tenet.ooo/v3/licensekey/process"))
-#endif
-
-#define AUTH_ISSUER ((std::string) _xor_("Tenet_Client"))
-#define AUTH_AUDIENCE ((std::string) _xor_("Tenet"))
-#define MAX_ATTEMPTS ((int) 10)
-
-namespace tenet {
-
-	void Auth::with_debug(std::string path)
+features::Authenticate			tenet::Auth::authenticate(std::string key, int attempts) {
+	if (!can_authenticate())
 	{
-		debug = true;
-		debug_path = path;
+		if (configuration.debug.activated()) { Logging::log(configuration.debug.get(), "The auth wasn't ready"); }
+		throw exceptions::GenericException("Auth not initialized");
 	}
 
-	void Auth::with_custom_hwid(std::string custom_hwid) {
-		if (!init)
-			throw GenericException("Auth not initialized");
+	features::Authenticate* response = new features::Authenticate(Api::authenticate(
+		key, configuration.hardware.get(), code, configuration.extension.get(), configuration.endpoints.authenticate, attempts));
 
-		hwid = custom_hwid;
-	}
+	this->response = response;
 
-	void Auth::with_hwid(std::list<HwidOption> hwid_options){
-		if (!init)
-			throw GenericException("Auth not initialized");
-
-		hwid_options.sort();
-		hwid_options.unique();
-
-		std::string tmp_hwid;
-		if (!hwid_options.empty())
-		{
-			for (HwidOption& option : hwid_options) {
-				switch (option) {
-					case HwidOption::Base_Board:
-						tmp_hwid += Hardware::get_base_board();
-						break;
-					case HwidOption::Computer_Name:
-						tmp_hwid += Hardware::get_computer_name();
-						break;
-					case HwidOption::Physical_Memory:
-						tmp_hwid += Hardware::get_physical_memory();
-						break;
-					case HwidOption::Username:
-						tmp_hwid += Hardware::get_username();
-						break;
-					default:
-						break;
-				}
-			}
-		}
-		else {
-			tmp_hwid = "";
-		}
-
-		tmp_hwid = Encryption::sha256(tmp_hwid) + Encryption::sha256(Hardware::get_computer_sid());
-		hwid = Encryption::sha256(tmp_hwid);
-	}
-
-	void Auth::with_variables(std::list<std::string> variables) {
-		if (!init)
-			throw GenericException("Auth not initialized");
-
-		variables.sort();
-		variables.unique();
-
-		auto is_empty_variable = [&](std::string s) { return s.empty(); };
-
-		variables.remove_if(is_empty_variable);
-		requested_variables = variables;
-	}
-
-	tenet::Response Auth::process(std::string key, int attempts) {
-		Logging logging;
-		if (attempts > MAX_ATTEMPTS)
-			attempts = MAX_ATTEMPTS;
-
+	if (response->succeed())
 		this->key = key;
 
-		if(attempts == 0)
-			return tenet::Response("Max attempts reached");
-		
-		--attempts;
+	return *response;
+}
 
-		Sleep(2000);
+features::Stream				tenet::Auth::stream(features::Authenticate& authenticate)
+{
+	if (!is_authenticated() || !authenticate.authenticated())
+		throw exceptions::GenericException("Client not ready");
 
-		if (debug)
-		{
-			logging = Logging::Logging(debug_path);
-		}
+	features::Stream response = Api::stream(authenticate, configuration.endpoints.stream);
 
-		if (key.empty())
-		{
-			if (debug) { logging.log("Empty key"); }
-			throw EmptyKeyException("License Key was empty");
-		}
+	return response;
+}
 
-		if (!init)
-		{
-			if (debug) { logging.log("The auth wasn't initialized"); }
-			throw GenericException("Auth not initialized");
-		}
+bool							tenet::Configuration::is_valid() {
+	if (!hardware.is_valid())
+		return false;
 
-		json object;
-		object[_xor_("client")][_xor_("variables")] = requested_variables;
-		object[_xor_("client")][_xor_("hwid")] = hwid;
+	return true;
+}
 
-		std::string token = Token::generate(object, product_code);
+tenet::Configuration			tenet::Configuration::with_endpoints(tenet::Configuration::Endpoints endpoints)
+{
+	if (!endpoints.authenticate.empty())
+		this->endpoints.authenticate = endpoints.authenticate;
 
-		cpr::AsyncResponse  fr = cpr::PostAsync(
-			cpr::Url{ AUTH_ENDPOINT },
-			cpr::Header{ { _xor_("accept"), _xor_("application/json")}, { _xor_("TN-Key"), key.c_str()} },
-			cpr::Parameters{
-				{ _xor_("token"), token.c_str() },
-				{ _xor_("key"), key.c_str() }
-			}
-		);
+	if (!endpoints.stream.empty())
+		this->endpoints.stream = endpoints.stream;
 
-		cpr::Response req;
-		req = fr.get();
+	return *this;
+}
+tenet::Configuration			tenet::Configuration::with_hardware(tenet::Configuration::Hardware::Base options)
+{
+	options.sort();
+	options.unique();
 
-		#if defined _DEBUG 
-			std::cout << "text: " << req.text << std::endl;
-			std::cout << "status_code: " << req.status_code << std::endl;
-			std::cout << "message: " << req.error.message << std::endl;
-			std::cout << "reason: " << req.reason << std::endl;
-		#endif
-
-		if(req.status_code == 449 && attempts > 0)
-			return Auth::process(key, attempts);
-		
-
-		if (req.status_code != 200) {
-
-			if (debug) {
-				logging.log(
-					"[" + req.reason + " " + std::to_string(req.status_code) + "]" +
-					" text: " + req.text +
-					" message: " + req.error.message
-				);
-			}
-
-			if (req.status_code == 429) {
-				return tenet::Response(req.text.empty() ? (req.reason.empty() ? "Rate limited" : req.reason) : req.text);
-			}
-			else if(req.status_code == 520){
-				return Auth::process(key, attempts); // 520 => CF error we try again by default
-			}
-			else {
-				return tenet::Response(req.text.empty() ? "The API can't be reached" : req.text);
-			}
-		}
-		
-		std::string data;
-		try {
-		 	data = Token::verify(req.text, product_code);
-		}
-		catch(GenericException ex){
-			if (debug) {
-				logging.log(ex.what());
-			}
-
-			if (attempts > 0)
-			{
-				return Auth::process(key, attempts);
-			}
-			else {
-				return tenet::Response(ex.what());
-			}
-		}
-
-		if (data.empty())
-		{
-			if (debug) { logging.log("Data set was empty"); }
-
-			if (attempts > 0)
-			{
-				return Auth::process(key, attempts);
-			}
-			else {
-				return tenet::Response("Empty data set");
-			}
-		}
-
-		json datas = json::parse(data);
-		json json_licenseKey = datas["LicenseKey"];
-		json json_variables = datas["Variables"];
-
-		tenet::Response *response = new tenet::Response(true, "Authentication succeed");
-
-		response->licenseKey = new tenet::LicenseKeyResponse(ResponseMapper::mapToLicenseKeyResponse(json_licenseKey));
-
-		if (!json_variables.is_null())
-		{
-			for (json json_variable : json_variables) {
-				if (!json_variable.is_null()) {
-					response->variables.insert({ json_variable["Name"].get<std::string>(), json_variable["Value"].get<std::string>() });
-				}
-			}
-		}
-
-		this->success = true;
-
-		return *response;
+	std::string value = "";
+	if (options.empty()) {
+		value.append(Encryption::sha256(hardware::computer_sid()));
 	}
+	else if (!options.empty())
+	{
+		for (tenet::Configuration::Hardware::Options& option : options) {
+			switch (option) {
+			case tenet::Configuration::Hardware::Options::Base_Board:
+				value = value.assign(hardware::base_board());
+				break;
+			case tenet::Configuration::Hardware::Options::Computer_Name:
+				value = value.append(hardware::computer_name());
+				break;
+			case tenet::Configuration::Hardware::Options::Physical_Memory:
+				value = value.append(hardware::physical_memory());
+				break;
+			case tenet::Configuration::Hardware::Options::Username:
+				value = value.append(hardware::username());
+				break;
+			case tenet::Configuration::Hardware::Options::Sid:
+				value = value.append(hardware::computer_sid());
+				break;
+			case tenet::Configuration::Hardware::Options::Processor:
+				value = value.append(hardware::processor_name());
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
+	if (value.empty())
+		throw exceptions::GenericException("Empty hwid");
+
+	return with_hardware(Encryption::sha256(value));
+}
+tenet::Configuration			tenet::Configuration::with_hardware(std::string value)
+{
+	hardware.value = value;
+	return *this;
+}
+tenet::Configuration			tenet::Configuration::with_variables(std::list<std::string> names)
+{
+	extension.variables = names;
+	return *this;
+}
+tenet::Configuration			tenet::Configuration::add_variable(std::string name)
+{
+	extension.variables.push_front(name);
+	return *this;
+}
+tenet::Configuration			tenet::Configuration::with_debug(std::string path) {
+	debug.enabled = true;
+	debug.path = path;
+	return *this;
+}
+
+bool							tenet::Configuration::Hardware::is_valid() {
+	return !value.empty();
+}
+std::string						tenet::Configuration::Hardware::get() {
+	return value;
+}
+
+std::list<std::string>			tenet::Configuration::Extension::get()
+{
+	return variables;
+}
+
+std::string						tenet::Configuration::Debug::get()
+{
+	return path;
+}
+bool							tenet::Configuration::Debug::activated() {
+	return enabled;
 }

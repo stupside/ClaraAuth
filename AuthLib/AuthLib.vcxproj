@@ -163,11 +163,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AuthLib.h" />
+    <ClInclude Include="src\modules\api.h" />
+    <ClInclude Include="src\modules\features.h" />
     <ClInclude Include="src\helpers\bytes.h" />
     <ClInclude Include="src\helpers\sha1.h" />
-    <ClInclude Include="src\mappers\jsonMapper.h" />
-    <ClInclude Include="src\models\requests.h" />
-    <ClInclude Include="src\models\responses.h" />
+    <ClInclude Include="src\mappers\mapper.h" />
     <ClInclude Include="src\utils\encryption.h" />
     <ClInclude Include="src\utils\hardware.h" />
     <ClInclude Include="src\utils\logging.h" />
@@ -176,13 +176,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AuthLib.cpp" />
-    <ClCompile Include="src\exceptions\EmptyKeyException.h" />
-    <ClCompile Include="src\exceptions\GenericException.h" />
+    <ClCompile Include="src\modules\api.cpp" />
+    <ClCompile Include="src\modules\features.cpp" />
+    <ClCompile Include="src\exceptions\all_exceptions.h" />
     <ClCompile Include="src\helpers\hotp.h" />
     <ClCompile Include="src\helpers\xor.h" />
-    <ClCompile Include="src\mappers\jsonMapper.cpp" />
-    <ClCompile Include="src\models\requests.cpp" />
-    <ClCompile Include="src\models\responses.cpp" />
+    <ClCompile Include="src\mappers\mapper.cpp" />
     <ClCompile Include="src\utils\encryption.cpp" />
     <ClCompile Include="src\utils\hardware.cpp" />
     <ClCompile Include="src\utils\logging.cpp" />
@@ -195,6 +194,5 @@
     <Text Include="CMakeLists.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets" />
 </Project>

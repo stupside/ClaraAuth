@@ -9,7 +9,7 @@
 #include <string>
 #include <utility>
 
-namespace tenet {
+namespace xr {
 
 	namespace
 	{

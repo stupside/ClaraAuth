@@ -1,42 +1,54 @@
-#include "AuthLib.h"
+#include "auth.h"
+#include "features.h"
 
 #include <iostream>
 
-#pragma region secret
-    #define PRODUCT_CODE ((std::string)"2897a71d64c845c4a36522ca07840ec9")
+#pragma region config
+    #define AUTH ((std::string)"http://localhost:5004/auth")
+    #define STREAM ((std::string)"http://localhost:49156/auth/stream")
+
+    #define HARDWARE (tenet::Configuration::Hardware::Options::Physical_Memory, tenet::Configuration::Hardware::Options::Base_Board )
+    #define PRODUCT_CODE ((std::string)"b3f6cec1ea2a4755b2b31bc126b75c71")
 #pragma endregion
 
 int main()
 {
-    tenet::Auth auth(PRODUCT_CODE);
+    tenet::Configuration config = tenet::Configuration()
+        .with_hardware({ HARDWARE })
+        .with_endpoints(tenet::Configuration::Endpoints(AUTH, STREAM));
 
-    // Make sure ot have rw access to the path
-    //auth.with_debug();
-
-    // auth.with_custom_hwid("custom_hwid");
-    // OR
-    std::list<tenet::HwidOption> options = { 
-        tenet::HwidOption::Physical_Memory,
-        tenet::HwidOption::Base_Board
-    };
-
-    auth.with_hwid(options);
-
-    //auth.with_variables({ "var1", "var2" });
+    tenet::Auth auth(PRODUCT_CODE, config);
 
     std::string key;
-    std::cout << "Enter a key : "; std::cin >> key;
-    //key = "83D9E624-0F91-4DA5-BDCA-B40BA5DB1FCB";
-    tenet::Response response = auth.process(key, 10);
+    std::cout << "Key : "; std::cin >> key;
+    key = "31376974-38E4-483C-9E31-B623BCB4C97A";
 
-    if (response.Succeed())
+    features::Authenticate response = auth.authenticate(key, 10);
+    if (response.succeed())
     {
-        std::cout << "expiration: " << response.licenseKey->expiration << std::endl;
-        // response.Variables()
+        if (!auth.is_authenticated())
+            return 0;
+
+        std::cout << response.license->get_id() << std::endl;
     }
     else {
-        std::cout << response.Message() << std::endl;
+        std::cout << response.message() << std::endl;
+        return 0;
     }
+
+    features::Stream stream = auth.stream(response);
+    if (!stream.succeed())
+    {
+        if(!stream.valid())
+            return 0;
+    }
+    else {
+        std::cout << stream.message() << std::endl;
+        return 0;
+    }
+
+
+    std::string decrypted = stream.decrypt("supersecret");
 
     return 0;
 }

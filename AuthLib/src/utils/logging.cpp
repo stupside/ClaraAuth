@@ -3,31 +3,31 @@
 #include <fstream>
 #include <iostream>
 
-std::string Logging::get_time() {
-	return "LOG";
+std::string Logging::get_time(std::string type) {
+	time_t now = time(0);
+	struct tm  tstruct;
+	char  buf[80];
+	tstruct = *localtime(&now);
+
+	if (type == "now")
+		strftime(buf, sizeof(buf), "%Y-%m-%d %X", &tstruct);
+	else if (type == "date")
+		strftime(buf, sizeof(buf), "%Y-%m-%d", &tstruct);
+
+	return std::string(buf);
 };
 
-Logging::Logging(std::string file_path) {
-	if (file_path.empty())
+void Logging::log(std::string path, const std::string message) {
+	if (path.empty())
 	{
 		path = getenv("APPDATA");
-		path = path.append("/Tenet_Auth/auth.log");
-	}
-	else {
-		path = file_path;
+		path = path.append("/tenet/");
 	}
 
-	std::cout << "Path to debug file: " << path << std::endl;
-};
-
-void Logging::log(const std::string message) {
-	std::ofstream file;
-	file.open(path, std::ios_base::app);
-
+	std::ofstream file(path.append("tenet_"+get_time("date")+".log").c_str(), std::ios_base::out | std::ios_base::app);
 	if (file.fail())
 		return;
 
-	file << "[" << id++ << "][" << get_time() << "] " << message << "\n";
-
+	file << get_time("now") << '\t' << message << '\n';
 	file.close();
 }

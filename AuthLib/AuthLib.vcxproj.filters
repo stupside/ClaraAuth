@@ -27,15 +27,6 @@
     <ClInclude Include="src\helpers\sha1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\mappers\jsonMapper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\models\requests.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\models\responses.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\utils\encryption.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -48,27 +39,24 @@
     <ClInclude Include="src\utils\logging.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\mappers\mapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\api.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modules\features.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AuthLib.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\exceptions\GenericException.h">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\helpers\hotp.h">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\helpers\xor.h">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mappers\jsonMapper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\models\requests.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\models\responses.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\utils\encryption.cpp">
@@ -83,7 +71,16 @@
     <ClCompile Include="src\utils\logging.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\exceptions\EmptyKeyException.h">
+    <ClCompile Include="src\mappers\mapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\api.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modules\features.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\exceptions\all_exceptions.h">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

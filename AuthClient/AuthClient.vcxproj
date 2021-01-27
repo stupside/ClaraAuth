@@ -151,8 +151,8 @@
     <ClCompile Include="AuthClient.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AuthLib.h" />
-    <ClInclude Include="responses.h" />
+    <ClInclude Include="auth.h" />
+    <ClInclude Include="features.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

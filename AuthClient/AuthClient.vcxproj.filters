@@ -20,10 +20,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AuthLib.h">
+    <ClInclude Include="features.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="responses.h">
+    <ClInclude Include="auth.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

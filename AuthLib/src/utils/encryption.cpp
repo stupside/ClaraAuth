@@ -107,3 +107,29 @@ std::string Encryption::iv_key() {
 
 	return guid.substr(0, 8) + guid.substr(9, 4) + guid.substr(14, 4);
 }
+
+std::string Encryption::encrypt_routine(std::string code, std::string datas, std::string& encrypted_iv, std::string& pass)
+{
+	pass = Encryption::pass(code);
+
+	std::string m_iv = Encryption::iv_key();
+
+	std::string encrypted_data = Encryption::encrypt(datas, pass, m_iv);
+	encrypted_iv = Encryption::encrypt(m_iv, code, pass);
+
+	return encrypted_data;
+}
+
+std::string Encryption::decrypt_routine(std::string encrypted_iv, std::string encrypted_datas, std::string code, std::string pass)
+{
+	std::string iv = Encryption::decrypt(encrypted_iv, code, pass); // IV
+	return Encryption::decrypt(encrypted_datas, pass, iv); // DATA
+}
+
+std::string Encryption::pass(std::string code)
+{
+	//auto b32 = cppcodec::base32_rfc4648::encode(code);
+	//auto otp = totp(Bytes::fromBase32(b32), time(nullptr), 0, AUTH_EXPIRY, 6);
+	//return Encryption::sha256(std::to_string(otp) + Encryption::sha256(code));
+	return Encryption::sha256(code);
+}

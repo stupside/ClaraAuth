@@ -8,8 +8,8 @@ class TenetAuth(ConanFile):
     license = "MIT"
     url = "github/xonery"
      
-    build_requires = "nlohmann_json/3.9.1", "jwt-cpp/0.4.0", "cpr/1.5.0", "cryptopp/8.2.0@bincrafters/stable", "cppcodec/0.2", "libcurl/7.73.0", "openssl/1.1.1g"
-    requires = "nlohmann_json/3.9.1", "jwt-cpp/0.4.0", "cpr/1.5.0", "cryptopp/8.2.0@bincrafters/stable", "cppcodec/0.2", "libcurl/7.73.0", "openssl/1.1.1g",
+    build_requires = "nlohmann_json/3.9.1", "jwt-cpp/0.4.0", "cpr/1.5.0", "cryptopp/8.2.0@bincrafters/stable", "libcurl/7.73.0", "openssl/1.1.1g"
+    requires = "nlohmann_json/3.9.1", "jwt-cpp/0.4.0", "cpr/1.5.0", "cryptopp/8.2.0@bincrafters/stable", "libcurl/7.73.0", "openssl/1.1.1g",
 
     generators = "cmake", "gcc", "txt", "cmake_find_package"
     settings = {"os", "compiler", "build_type", "arch"}

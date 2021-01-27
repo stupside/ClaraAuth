@@ -5,8 +5,6 @@
 
 #include "hardware.h"
 
-#include "encryption.h"
-
 #include <Windows.h>
 #include <stdio.h>
 #include <string>
@@ -24,7 +22,7 @@
 
 #pragma comment(lib, "wbemuuid.lib")
 
-std::string Hardware::get_computer_sid() {
+std::string hardware::computer_sid() {
 	HANDLE h_token = nullptr;
 	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &h_token))
 	{
@@ -69,8 +67,7 @@ std::string Hardware::get_computer_sid() {
 
 	return psz_sid_str;
 }
-
-std::string Hardware::get_processor_name()
+std::string hardware::processor_name()
 {
 	int CPUInfo[4] = { -1 };
 	char CPUBrandString[0x40];
@@ -89,8 +86,7 @@ std::string Hardware::get_processor_name()
 	}
 	return CPUBrandString;
 }
-
-std::string Hardware::get_username()
+std::string hardware::username()
 {
 	wchar_t name[UNLEN + 1];
 	DWORD size = UNLEN + 1;
@@ -104,8 +100,7 @@ std::string Hardware::get_username()
 	}
 	return UserName;
 }
-
-std::string Hardware::get_base_board()
+std::string hardware::base_board()
 {
 	HRESULT hr;
 	hr = CoInitializeEx(0, COINIT_MULTITHREADED);
@@ -136,8 +131,7 @@ std::string Hardware::get_base_board()
 	}
 	return ("Win32_BaseBoardFAILED");
 }
-
-std::string Hardware::get_physical_memory()
+std::string hardware::physical_memory()
 {
 	HRESULT hr;
 	hr = CoInitializeEx(0, COINIT_MULTITHREADED);
@@ -169,8 +163,7 @@ std::string Hardware::get_physical_memory()
 	}
 	return ("Win32_PhysicalMemoryFAILED");
 }
-
-std::string Hardware::get_computer_name()
+std::string hardware::computer_name()
 {
 	wchar_t buffer[MAX_COMPUTERNAME_LENGTH + 1] = { 0 };
 	DWORD cchBufferSize = sizeof(buffer) / sizeof(buffer[0]);
