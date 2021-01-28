@@ -4,7 +4,8 @@
 #include <iostream>
 
 #pragma region config
-#define AUTH "http://localhost:5005"
+#define PROXY "http://localhost:5005"
+#define TENET "http://localhost:5004"
 #define HARDWARE { tenet::Configuration::Hardware::Options::Physical_Memory, tenet::Configuration::Hardware::Options::Base_Board }
 
 
@@ -21,7 +22,7 @@ int main()
 	//std::cout <<  << std::endl;
 
 	tenet::Configuration config = tenet::Configuration()
-		.with_endpoints(AUTH)
+		.with_endpoints(TENET)
 		.with_hardware(HARDWARE);
 
 	tenet::Auth auth(PRODUCT_CODE, config);

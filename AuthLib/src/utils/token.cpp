@@ -13,6 +13,7 @@
 #define AUTH_EXPIRY ((int) 60)
 
 std::string token::verify(std::string token, std::string code) {
+
 	std::string pass = Encryption::pass(code);
 
 	if (token.empty())
@@ -23,11 +24,12 @@ std::string token::verify(std::string token, std::string code) {
 	auto decoded = jwt::decode(token);
 
 	try {
-		jwt::verify()
-			.allow_algorithm(jwt::algorithm::hs256(pass))
-			.with_audience(std::set<std::string>{ AUTH_AUDIENCE })
-			.with_issuer(AUTH_ISSUER)
-			.verify(jwt::decode(token));
+		auto verify = jwt::verify()
+			.allow_algorithm(jwt::algorithm::hs256{ pass })
+			.with_audience(AUTH_AUDIENCE)
+			.with_issuer(AUTH_ISSUER);
+
+		verify.verify(decoded);
 	}
 	catch (jwt::signature_verification_exception) {
 		throw exceptions::TokenException("Signature verification failed");
@@ -36,10 +38,10 @@ std::string token::verify(std::string token, std::string code) {
 		throw exceptions::TokenException("Token verification failed");
 	}
 	catch (jwt::signature_generation_exception) {
-		throw exceptions::TokenException("Signature verification failed");
+		throw exceptions::TokenException("Signature generation failed");
 	}
 	catch (std::bad_cast) {
-		throw exceptions::TokenException("Bad values");
+		throw exceptions::TokenException("Something went wrong");
 	}
 	catch (std::invalid_argument) {
 		throw exceptions::TokenException("Invalid token");
