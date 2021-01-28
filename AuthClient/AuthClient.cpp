@@ -4,47 +4,52 @@
 #include <iostream>
 
 #pragma region config
-    #define AUTH "http://localhost:5005"
-    #define HARDWARE { tenet::Configuration::Hardware::Options::Physical_Memory, tenet::Configuration::Hardware::Options::Base_Board }
-    #define PRODUCT_CODE "b3f6cec1ea2a4755b2b31bc126b75c71"
+#define AUTH "http://localhost:5005"
+#define HARDWARE { tenet::Configuration::Hardware::Options::Physical_Memory, tenet::Configuration::Hardware::Options::Base_Board }
+
+
+#define PRODUCT_CODE "1e22fc2d1f8f480984dc4009e130e739"
+#define STREAM_CODE "secret"
 #pragma endregion
 
 int main()
 {
-    tenet::Configuration config = tenet::Configuration()
-        .with_hardware(HARDWARE)
-        .with_endpoints(AUTH);
+	std::string key;
+	std::cout << "Key : ";
+	std::cin >> key;
 
-    tenet::Auth auth(PRODUCT_CODE, config);
+	//std::cout <<  << std::endl;
 
-    std::string key;
-    std::cout << "Key : "; std::cin >> key;
-    key = "31376974-38E4-483C-9E31-B623BCB4C97A";
+	tenet::Configuration config = tenet::Configuration()
+		.with_endpoints(AUTH)
+		.with_hardware(HARDWARE);
 
-    features::Authenticate response = auth.authenticate(key, 10); // 1. Authenticate
-    if (!response.succeed()) // 2. Check if OK 200
-    {
-        std::cout << response.message() << std::endl;
-        return 0;
-    }
+	tenet::Auth auth(PRODUCT_CODE, config);
 
-    if (!auth.is_authenticated()) // 3. Check if authenticated
-        return 0;
+	features::Authenticate response = auth.authenticate(key, 10);
+	if (!response.succeed())
+	{
+		std::cout << response.message() << std::endl;
+		return 0;
+	}
 
-    std::cout << response.license->creator.name << std::endl;
+	if (!auth.is_authenticated())
+		return 0;
 
-    features::Stream stream = auth.stream(response); // 6. Stream
-    if (!stream.succeed()) // 5. Check if OK 200
-    {
-        std::cout << stream.message() << std::endl;
-        return 0;
-    }
+	std::cout << "product: " << response.license->product.name << std::endl;
+	std::cout << "package: " << response.license->package.name << std::endl;
 
-    if (!stream.valid()) // 6. Check if valid stream
-        return 0;
+	features::Stream stream = auth.stream(response);
+	if (!stream.succeed())
+	{
+		std::cout << stream.message() << std::endl;
+		return 0;
+	}
 
-    std::string decrypted = stream.decrypt("supersecret"); // 7. Decrypt stream
-    std::cout << "decrypted stream = " << decrypted << std::endl;
+	if (!stream.valid())
+		return 0;
 
-    return 0;
+	std::cout << stream.decrypt(STREAM_CODE) << std::endl;
+
+	return 0;
 }
