@@ -5,19 +5,22 @@
 #include "../utils/token.h"
 #include "../utils/encryption.h"
 
-std::string		features::Stream::decrypt(std::string key)
+std::string		features::Stream::decrypt(std::string secret)
 {
 	if (!valid())
 		throw exceptions::GenericException("Invalid stream");
 
-	return Encryption::decrypt(this->encrypted, key, this->iv);
+	std::string decrypted = Encryption::decrypt(this->encrypted, secret, this->iv);
+	return decrypted;
 }
 bool			features::Stream::valid()
 {
-	if (hash != Encryption::sha256(this->encrypted + '.' + this->iv))
+	if (this->encrypted.empty() || this->iv.empty() || this->hash.empty())
 		return false;
 
-	return (!this->encrypted.empty() && !this->iv.empty() && !this->hash.empty());
+	std::string reqh = Encryption::sha256(this->encrypted + this->iv);
+
+	return this->hash == reqh;
 }
 
 const bool		features::Authenticate::can_stream()
@@ -27,7 +30,7 @@ const bool		features::Authenticate::can_stream()
 
 const bool		features::Authenticate::authenticated()
 {
-	return this->license != nullptr && this->succeed();
+	return this->license != nullptr && succeed();
 }
 
 bool features::Response::succeed()

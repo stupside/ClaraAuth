@@ -1,12 +1,9 @@
 #include "api.h"
 
-#if defined _DEBUG
-#define ROOT ((std::string) "http://localhost:5004")
-#else 
-#define ROOT ((std::string) "http://api.tenet.ooo/v3")
-#endif
-
 #define MAX_ATTEMPTS ((int) 10)
+
+#define AUTH "/api/auth"
+#define STREAM "/api/stream"
 
 #include <nlohmann/json.hpp>
 
@@ -23,7 +20,8 @@ features::Authenticate	Api::authenticate(std::string key, std::string hwid, std:
 	object["variables"] = variables;
 	object["hwid"] = hwid;
 
-	cpr::Response response = post_req(endpoint,
+	cpr::Response response = post_req(
+		cpr::Url{ endpoint + AUTH },
 		cpr::Parameters{
 			{ "token", token::generate(object, code).c_str() },
 		},
@@ -75,14 +73,15 @@ features::Authenticate	Api::authenticate(std::string key, std::string hwid, std:
 
 features::Stream		Api::stream(features::Authenticate authenticate, std::string endpoint, int attempts) {
 
-	cpr::Response response = post_req(endpoint,
+	cpr::Response response = post_req(
+		cpr::Url{ endpoint + STREAM },
 		cpr::Parameters{},
 		cpr::Header{
 			{"TN-KEY", authenticate.license->key.c_str()},
 			{"TN-IST", authenticate.ist.c_str()}
 		});
 
-	if (response.status_code != 200 || response.text.empty())
+	if (response.status_code != 200)
 		return features::Stream("Cannot stream from server");
 
 	std::string encrypted_stream = response.text;

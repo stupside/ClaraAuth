@@ -6,7 +6,10 @@
 
 #include "features.h"
 
+#define DEFAULT_ROOT "http://auth.tenet.ooo"
+
 namespace tenet {
+
 	class Auth;
 	class Configuration {
 	public:
@@ -46,10 +49,12 @@ namespace tenet {
 			};
 			typedef std::list<tenet::Configuration::Hardware::Options> Base;
 		private:
-			Base options;
+			Base		options;
 			std::string value;
 		protected:
-			Hardware() {};
+			Hardware();
+			Hardware(std::string value);
+			Hardware(Base options);
 		public:
 			/// <summary>
 			/// Returns true if the hardware id is valid.
@@ -67,11 +72,10 @@ namespace tenet {
 			friend class tenet::Auth;
 			friend class tenet::Configuration;
 		private:
-			std::string					authenticate;
-			std::string					stream;
+			std::string					root;
 		public:
-			Endpoints(std::string authenticate = "", std::string stream = "")
-				: authenticate(authenticate), stream(stream) {};
+			Endpoints();
+			Endpoints(std::string url);
 		};
 	public:
 
@@ -125,7 +129,7 @@ namespace tenet {
 		/// </summary>
 		/// <param name="endpoints"></param>
 		/// <returns></returns>
-		tenet::Configuration			with_endpoints(tenet::Configuration::Endpoints endpoints);
+		tenet::Configuration			with_endpoints(std::string root);
 
 		/// <summary>
 		/// Returns true if the configuration is valid
@@ -139,7 +143,7 @@ namespace tenet {
 		bool					initialized;
 
 		std::string				key;
-		const std::string		code;
+		std::string				code;
 	public:
 
 		features::Authenticate* response;
@@ -148,9 +152,9 @@ namespace tenet {
 		/// <summary>
 		/// Instanciate a new Auth context binded to a configuration
 		/// </summary>
-		/// <param name="product_code">Your product code</param>
-		Auth(std::string code, tenet::Configuration configuration)
-			: code(code), initialized(true), configuration(configuration), response() {};
+		/// <param name="code">Your product code</param>
+		Auth(std::string product_code, tenet::Configuration configuration);
+
 
 		/// <summary>
 		/// Returns true if the client can be authenticated
