@@ -96,6 +96,11 @@ cpr::Response			Api::post_req(std::string endpoint, cpr::Parameters parameters, 
 	if (attempts > MAX_ATTEMPTS)
 		attempts = MAX_ATTEMPTS;
 
+	//cpr::SslOptions ssl =
+	//	cpr::Ssl(cpr::ssl::CaPath{ baseDirPath + "ca.cer" }, cpr::ssl::CertFile{ baseDirPath + "client.cer" },
+	//		cpr::ssl::KeyFile{ baseDirPath + "client.key" }, cpr::ssl::VerifyPeer{ false },
+	//		cpr::ssl::VerifyHost{ false }, cpr::ssl::VerifyStatus{ false });
+
 	cpr::AsyncResponse  fr = cpr::PostAsync(
 		cpr::Url{ endpoint },
 		headers,
