@@ -8,9 +8,9 @@
 
 #include <jwt-cpp/jwt.h>
 
-#define AUTH_ISSUER ((std::string) "Tenet_Client")
-#define AUTH_AUDIENCE ((std::string) "Tenet")
-#define AUTH_EXPIRY ((int) 60)
+#define AUTH_ISSUER "Tenet_Client"
+#define AUTH_AUDIENCE "Tenet"
+#define AUTH_EXPIRY 60
 
 std::string token::verify(std::string token, std::string code) {
 
@@ -26,8 +26,9 @@ std::string token::verify(std::string token, std::string code) {
 	try {
 		auto verify = jwt::verify()
 			.allow_algorithm(jwt::algorithm::hs256{ pass })
-			.with_audience(AUTH_AUDIENCE)
-			.with_issuer(AUTH_ISSUER);
+			.with_audience(std::set<std::string>({ AUTH_AUDIENCE }))
+			.with_issuer({ AUTH_ISSUER });
+
 
 		verify.verify(decoded);
 	}
@@ -40,8 +41,8 @@ std::string token::verify(std::string token, std::string code) {
 	catch (jwt::signature_generation_exception) {
 		throw exceptions::TokenException("Signature generation failed");
 	}
-	catch (std::bad_cast) {
-		throw exceptions::TokenException("Something went wrong");
+	catch (std::bad_cast ex) {
+		throw exceptions::TokenException("Token Bad cast");
 	}
 	catch (std::invalid_argument) {
 		throw exceptions::TokenException("Invalid token");

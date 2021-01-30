@@ -22,7 +22,7 @@ int main()
 	//std::cout <<  << std::endl;
 
 	tenet::Configuration config = tenet::Configuration()
-		.with_endpoints(TENET)
+		.with_endpoints(PROXY)
 		.with_hardware(HARDWARE);
 
 	tenet::Auth auth(PRODUCT_CODE, config);
