@@ -9,8 +9,8 @@
 #define HARDWARE { tenet::Configuration::Hardware::Options::Physical_Memory, tenet::Configuration::Hardware::Options::Base_Board }
 
 
-#define PRODUCT_CODE "1e22fc2d1f8f480984dc4009e130e739"
-#define STREAM_CODE "secret"
+#define PRODUCT_CODE ""
+#define STREAM_CODE ""
 #pragma endregion
 
 int main()
@@ -22,7 +22,7 @@ int main()
 	//std::cout <<  << std::endl;
 
 	tenet::Configuration config = tenet::Configuration()
-		.with_endpoints(PROXY)
+		.with_endpoints("auth.tenet.ooo")
 		.with_hardware(HARDWARE);
 
 	tenet::Auth auth(PRODUCT_CODE, config);
