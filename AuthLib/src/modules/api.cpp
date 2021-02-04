@@ -50,10 +50,10 @@ features::Authenticate	Api::authenticate(std::string key, std::string hwid, std:
 		return features::Authenticate("Empty datas");
 
 	json datas = json::parse(data);
-	json json_licenseKey = datas["LicenseKey"];
+	json json_license = datas["License"];
 	json json_variables = datas["Variables"];
 	
-	features::models::License* license = new features::models::License(mappers::LicenseMapper::map(json_licenseKey));
+	features::models::License* license = new features::models::License(mappers::LicenseMapper::map(json_license));
 
 	features::Authenticate* rep = new features::Authenticate(license);
 

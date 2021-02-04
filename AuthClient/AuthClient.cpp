@@ -4,13 +4,12 @@
 #include <iostream>
 
 #pragma region config
-#define PROXY "http://localhost:5005"
-#define TENET "http://localhost:5004"
 #define HARDWARE { tenet::Configuration::Hardware::Options::Physical_Memory, tenet::Configuration::Hardware::Options::Base_Board }
 
+#define AUTH "http://localhost:5004" // change to your middleman server url if needed.
+#define PRODUCT_CODE "0146c225ac3347458506af8b8105fb9e"
+//#define STREAM_SECRET "secret"
 
-#define PRODUCT_CODE ""
-#define STREAM_CODE ""
 #pragma endregion
 
 int main()
@@ -19,10 +18,8 @@ int main()
 	std::cout << "Key : ";
 	std::cin >> key;
 
-	//std::cout <<  << std::endl;
-
 	tenet::Configuration config = tenet::Configuration()
-		.with_endpoints("auth.tenet.ooo")
+		.with_endpoints(AUTH)
 		.with_hardware(HARDWARE);
 
 	tenet::Auth auth(PRODUCT_CODE, config);
@@ -40,17 +37,17 @@ int main()
 	std::cout << "product: " << response.license->product.name << std::endl;
 	std::cout << "package: " << response.license->package.name << std::endl;
 
-	features::Stream stream = auth.stream(response);
-	if (!stream.succeed())
-	{
-		std::cout << stream.message() << std::endl;
-		return 0;
-	}
+	//features::Stream stream = auth.stream(response);
+	//if (!stream.succeed())
+	//{
+	//	std::cout << stream.message() << std::endl;
+	//	return 0;
+	//}
 
-	if (!stream.valid())
-		return 0;
+	//if (!stream.valid())
+	//	return 0;
 
-	std::cout << stream.decrypt(STREAM_CODE) << std::endl;
+	//std::cout << stream.decrypt(STREAM_SECRET) << std::endl;
 
 	return 0;
 }
