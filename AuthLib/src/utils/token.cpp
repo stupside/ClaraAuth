@@ -12,14 +12,12 @@
 #define AUTH_AUDIENCE "Tenet"
 #define AUTH_EXPIRY 60
 
-std::string token::verify(std::string token, std::string code) {
+const std::string& token::verify(std::string& token, const std::string& code) {
 
 	std::string pass = Encryption::pass(code);
 
 	if (token.empty())
 		throw exceptions::TokenException("Invalid token");
-
-	token.erase(std::remove(token.begin(), token.end(), '"'), token.end());
 
 	auto decoded = jwt::decode(token);
 
@@ -55,7 +53,7 @@ std::string token::verify(std::string token, std::string code) {
 	return decrypted; // DATA
 }
 
-std::string token::generate(json object, std::string code)
+const std::string& token::generate(const json& object, const std::string& code)
 {
 	std::string encrypted_iv;
 	std::string pass;

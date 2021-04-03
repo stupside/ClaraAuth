@@ -5,40 +5,23 @@
 #include "../utils/token.h"
 #include "../utils/encryption.h"
 
-std::string		features::Stream::decrypt(std::string secret)
+const std::string& features::Stream::descrypte(const std::string& secret) const
 {
 	if (!valid())
 		throw exceptions::GenericException("Invalid stream");
 
-	std::string decrypted = Encryption::decrypt(this->encrypted, secret, this->iv);
+	std::string decrypted = Encryption::decrypt(this->encrypted(), secret, this->iv());
 	return decrypted;
 }
-bool			features::Stream::valid()
+bool features::Stream::valid() const
 {
-	if (this->encrypted.empty() || this->iv.empty() || this->hash.empty())
+	if (this->encrypted().empty() || this->iv().empty() || this->hash().empty())
 		return false;
 
-	std::string reqh = Encryption::sha256(this->encrypted + this->iv);
-
-	return this->hash == reqh;
+	return this->hash() == Encryption::sha256(this->encrypted() + this->iv());
 }
 
-const bool		features::Authenticate::can_stream()
+const bool features::Authenticate::canStream() const
 {
-	return this->succeed() && !this->ist.empty();
-}
-
-const bool		features::Authenticate::authenticated()
-{
-	return this->license != nullptr && succeed();
-}
-
-bool features::Response::succeed()
-{
-	return _succeed;
-}
-
-std::string features::Response::message()
-{
-	return _message;
+	return !this->m_ist.empty();
 }

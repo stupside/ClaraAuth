@@ -10,30 +10,31 @@
 
 #include "src/utils/hardware.h"
 
-tenet::Configuration::Hardware::Hardware() {
+const tenet::Configuration::Hardware::Base& tenet::Configuration::Hardware::DEFAULT_OPTIONS = { 
+	tenet::Configuration::Hardware::Options::Physical_Memory, tenet::Configuration::Hardware::Options::Base_Board 
+};
 
-}
-tenet::Configuration::Hardware::Hardware(std::string value) {
+void tenet::Configuration::Hardware::set(const std::string& value)
+{
 	if (value.empty())
 		throw exceptions::GenericException("Empty hwid");
 
-	this->value = value;
+	this->m_value = value;
 }
-tenet::Configuration::Hardware::Hardware(tenet::Configuration::Hardware::Base options)
-{
-	options.sort();
-	options.unique();
 
+void tenet::Configuration::Hardware::set(const tenet::Configuration::Hardware::Base& options)
+{
 	std::string value = std::string();
 	if (options.empty()) {
 		value.append(Encryption::sha256(hardware::computer_sid()));
 	}
+
 	else if (!options.empty())
 	{
-		for (tenet::Configuration::Hardware::Options& option : options) {
+		for (auto& option : options) {
 			switch (option) {
 			case tenet::Configuration::Hardware::Options::Base_Board:
-				value = value.assign(hardware::base_board());
+				value = value.append(hardware::base_board());
 				break;
 			case tenet::Configuration::Hardware::Options::Computer_Name:
 				value = value.append(hardware::computer_name());
@@ -56,134 +57,69 @@ tenet::Configuration::Hardware::Hardware(tenet::Configuration::Hardware::Base op
 		}
 	}
 
-	this->value = Encryption::sha256(value);
+	this->set(Encryption::sha256(value));
 }
 
-tenet::Configuration::Endpoints::Endpoints()
+const std::string& tenet::Configuration::Endpoints::DEFAULT_URL= "http://auth.tenet.ooo";
+
+const std::string& tenet::Configuration::Endpoints::STREAM = "/api/stream";
+const std::string& tenet::Configuration::Endpoints::AUTH = "/api/auth";
+
+tenet::Auth::Auth(const std::string& code)
+	: m_context(nullptr), m_code(code)
 {
-	this->root = DEFAULT_ROOT;
-}
-tenet::Configuration::Endpoints::Endpoints(std::string url)
-{
-	if (url.empty())
-		throw exceptions::GenericException("Invalid endpoint");
-
-
-
-	this->root = url;
-}
-
-tenet::Auth::Auth(std::string product_code, tenet::Configuration configuration)
-{
-	if (product_code.empty())
+	if (code.empty())
 		throw exceptions::GenericException("Invalid product code");
-
-	this->code = product_code;
-	this->configuration = configuration;
-	this->response = nullptr;
 }
 
-const bool						tenet::Auth::can_authenticate()
+tenet::Auth::~Auth() {
+	if (m_context != nullptr)
+		delete this->m_context;
+}
+
+const int tenet::Auth::DEFAULT_ATTEMPS = 2;
+
+const bool tenet::Auth::valid() const
 {
-	if (!configuration.is_valid() || initialized && code.empty())
+	if (this->m_code.empty())
 		return false;
 
-	if (response != nullptr)
-		return response->authenticated();
+	if (this->m_context != nullptr)
+		return this->context() != nullptr && this->m_context->succeed();
 
 	return true;
-
 }
-const bool						tenet::Auth::is_authenticated()
+
+const bool tenet::Auth::authenticated() const
 {
-	if (!configuration.is_valid() || initialized && code.empty() ||key.empty())
+	if (this->context() == nullptr)
 		return false;
 
-	if (response == nullptr)
-		return false;
-
-	return response->authenticated();
+	return this->m_context->succeed();
 }
-features::Authenticate			tenet::Auth::authenticate(std::string key, int attempts) {
-	if (!can_authenticate())
+
+const features::Response<features::Authenticate>& tenet::Auth::authenticate(const std::string& key, int attempts) {
+
+	if (!valid())
 		throw exceptions::GenericException("Auth is not initialized");
 
-	features::Authenticate* response = new features::Authenticate(Api::authenticate(
-		key, configuration.hardware.get(), code, configuration.extension.get(), configuration.endpoints.root, attempts));
+	std::string test = tenet::Configuration::endpoints().auth();
 
-	this->response = response;
+	this->m_context = Api::authenticate(key,
+		tenet::Configuration::hardware().get(),
+		this->m_code,
+		tenet::Configuration::extension().get(),
+		test,
+		attempts
+	);
 
-	if (response->succeed())
-		this->key = key;
-
-	return *response;
+	return *this->m_context;
 }
-features::Stream				tenet::Auth::stream(features::Authenticate& authenticate)
+
+const features::Response<features::Stream>& tenet::Auth::stream() const
 {
-	if (!is_authenticated() || !authenticate.authenticated())
+	if (this->context() == nullptr || this->context()->canStream())
 		throw exceptions::GenericException("Client is not authenticated");
 
-	features::Stream* response = new features::Stream(Api::stream(authenticate, configuration.endpoints.root));
-
-	return *response;
-}
-
-bool							tenet::Configuration::is_valid() {
-	if (!hardware.is_valid())
-		return false;
-
-	if (endpoints.root.empty())
-		return false;
-
-	return true;
-}
-
-tenet::Configuration			tenet::Configuration::with_endpoints(std::string root)
-{
-	this->endpoints = tenet::Configuration::Endpoints(root);
-	return *this;
-}
-tenet::Configuration			tenet::Configuration::with_hardware(tenet::Configuration::Hardware::Base options)
-{
-	this->hardware = tenet::Configuration::Hardware(options);
-	return *this;
-}
-tenet::Configuration			tenet::Configuration::with_hardware(std::string value)
-{
-	this->hardware = tenet::Configuration::Hardware(value);
-	return *this;
-}
-tenet::Configuration			tenet::Configuration::with_variables(std::list<std::string> names)
-{
-	this->extension.variables = names;
-	return *this;
-}
-tenet::Configuration			tenet::Configuration::add_variable(std::string name)
-{
-	extension.variables.push_front(name);
-	return *this;
-}
-tenet::Configuration			tenet::Configuration::with_debug(std::string path) {
-	this->debug.enabled = true;
-	this->debug.path = path;
-	return *this;
-}
-
-bool							tenet::Configuration::Hardware::is_valid() {
-	return !value.empty();
-}
-std::string						tenet::Configuration::Hardware::get() {
-	return value;
-}
-std::list<std::string>			tenet::Configuration::Extension::get()
-{
-	return variables;
-}
-
-std::string						tenet::Configuration::Debug::get()
-{
-	return path;
-}
-bool							tenet::Configuration::Debug::activated() {
-	return enabled;
+	return Api::stream(*this->context(), tenet::Configuration::endpoints().stream());
 }

@@ -2,9 +2,6 @@
 
 #define MAX_ATTEMPTS ((int) 10)
 
-#define AUTH "/api/auth"
-#define STREAM "/api/stream"
-
 #include <nlohmann/json.hpp>
 
 #include "../exceptions/all_exceptions.h"
@@ -14,84 +11,87 @@
 #include "../utils/encryption.h"
 #include "../mappers/mapper.h"
 
-features::Authenticate	Api::authenticate(std::string key, std::string hwid, std::string code, std::list<std::string> variables, std::string endpoint, int attempts)
+const features::Response<features::Authenticate>* Api::authenticate(const std::string& key, const std::string& hwid, const std::string& code, std::list<std::string> variables, const std::string& endpoint, int attempts)
 {
 	json object;
 	object["variables"] = variables;
 	object["hwid"] = hwid;
 
+	std::string token = token::generate(object, code);
+
 	cpr::Response response = post_req(
-		cpr::Url{ endpoint + AUTH },
+		cpr::Url{ endpoint },
 		cpr::Parameters{
-			{ "token", token::generate(object, code).c_str() },
+			{ "token", token.c_str() },
 		},
 		cpr::Header{
 			{"accept","application/json"},
-			{"TN-KEY", key.c_str()}
-		});
+			{"TN-KEY", key.c_str() }
+		}, attempts);
 
 	if (response.status_code != 200)
 	{
-		return features::Authenticate(response.text.empty() ?
-			(response.reason.empty() ? "Something went wrong" : response.reason)
-			: response.text);
+		return new features::Response<features::Authenticate>(
+			response.text.empty() ?
+				(response.reason.empty() ? "Something went wrong" : response.reason)
+				: response.text);
 	}
 
 	std::string data;
+
 	try {
+		response.text.erase(std::remove(response.text.begin(), response.text.end(), '"'), response.text.end()); // We need some formating there of the token
 		data = token::verify(response.text, code);
 	}
 	catch (exceptions::TokenException ex)
 	{
-		return features::Authenticate(ex.what());
+		return new features::Response<features::Authenticate>(ex.what());
 	}
 
 	if (data.empty())
-		return features::Authenticate("Empty datas");
+		return new features::Response<features::Authenticate>("Empty datas");
 
 	json datas = json::parse(data);
 	json json_license = datas["License"];
 	json json_variables = datas["Variables"];
-	
-	features::models::License* license = new features::models::License(mappers::LicenseMapper::map(json_license));
 
-	features::Authenticate* rep = new features::Authenticate(license);
-
-	rep->ist = response.header["TN-IST"];
+	std::map<std::string, std::string> tmp;
 
 	if (!json_variables.is_null())
 	{
 		for (json json_variable : json_variables) {
 			if (!json_variable.is_null()) {
-				rep->variables->insert({ json_variable["Name"].get<std::string>(), json_variable["Value"].get<std::string>() });
+				tmp.emplace(json_variable["Name"].get<std::string>(), json_variable["Value"].get<std::string>());
 			}
 		}
 	}
-	
-	return *rep;
+
+	features::models::License license = features::models::License(mappers::LicenseMapper::map(json_license));
+			
+	const features::Authenticate* authenticate = new features::Authenticate(license, tmp, response.header["TN-IST"]);
+
+	return new features::Response<features::Authenticate>(authenticate);
 }
 
-features::Stream		Api::stream(features::Authenticate authenticate, std::string endpoint, int attempts) {
+const features::Response<features::Stream>& Api::stream(const features::Authenticate& authenticate, const std::string& endpoint) {
 
 	cpr::Response response = post_req(
-		cpr::Url{ endpoint + STREAM },
+		cpr::Url{ endpoint },
 		cpr::Parameters{},
 		cpr::Header{
-			{"TN-KEY", authenticate.license->key.c_str()},
-			{"TN-IST", authenticate.ist.c_str()}
-		});
+			{"TN-KEY", authenticate.license().key().c_str()},
+			{"TN-IST", authenticate.m_ist.c_str()}
+		}, 1);
 
 	if (response.status_code != 200)
-		return features::Stream("Cannot stream from server");
+		return features::Response<features::Stream>("Cannot stream from server");
 
-	std::string encrypted_stream = response.text;
-	std::string iv = response.header["i"];
-	std::string hash = response.header["h"];
+	const features::Stream* stream = new features::Stream(response.text, response.header["i"], response.header["h"]);
 
-	return features::Stream(encrypted_stream, iv, hash);
+	return features::Response<features::Stream>(stream);
 }
 
-cpr::Response			Api::post_req(std::string endpoint, cpr::Parameters parameters, cpr::Header headers, int attempts)
+const cpr::Response& Api::post_req(std::string endpoint, cpr::Parameters parameters, cpr::Header headers, int attempts)
 {
 	if (attempts > MAX_ATTEMPTS)
 		attempts = MAX_ATTEMPTS;
@@ -124,7 +124,8 @@ cpr::Response			Api::post_req(std::string endpoint, cpr::Parameters parameters, 
 
 	return req;
 }
-cpr::Response			Api::get_req(std::string endpoint, cpr::Parameters parameters, cpr::Header headers, int attempts)
+
+const cpr::Response& Api::get_req(std::string endpoint, cpr::Parameters parameters, cpr::Header headers, int attempts)
 {
 	if (attempts > MAX_ATTEMPTS)
 		attempts = MAX_ATTEMPTS;
