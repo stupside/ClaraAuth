@@ -127,7 +127,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -179,7 +179,7 @@
     <ClCompile Include="AuthLib.cpp" />
     <ClCompile Include="src\modules\api.cpp" />
     <ClCompile Include="src\modules\features.cpp" />
-    <ClCompile Include="src\exceptions\all_exceptions.h" />
+    <ClCompile Include="src\exceptions\exceptions.h" />
     <ClCompile Include="src\helpers\hotp.h" />
     <ClCompile Include="src\helpers\xor.h" />
     <ClCompile Include="src\mappers\mapper.cpp" />

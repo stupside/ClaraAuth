@@ -18,6 +18,7 @@ int main()
 	std::cin >> key;
 
 	tenet::Configuration::debug().enable(false);
+	tenet::Configuration::endpoints().set("http://localhost:5005");
 
 	auto& auth = tenet::Auth::init(PRODUCT_CODE);
 
@@ -31,7 +32,6 @@ int main()
 	std::cout << "product: " << auth.context()->license().product().name() << std::endl;
 	std::cout << "package: " << auth.context()->license().package().name() << std::endl;
 
-	/*
 	features::Response<features::Stream> stream = auth.stream();
 	if (!stream.succeed())
 	{
@@ -42,8 +42,7 @@ int main()
 	if (!stream.data()->valid())
 		return 0;
 
-	std::cout << stream.data()->descrypte(STREAM_SECRET) << std::endl;
-	*/
+	std::cout << stream.data()->descrypt(STREAM_SECRET) << std::endl;
 
 	return 0;
 }

@@ -1,10 +1,12 @@
+#pragma once
+
 #include <iostream>
 #include <cassert>
 #include "../helpers/bytes.h"
 
 typedef Bytes::ByteString(*HmacFunc)(const Bytes::ByteString&, const Bytes::ByteString&);
 
-static inline uint32_t lrot32(uint32_t num, uint8_t rotcount)
+inline uint32_t lrot32(uint32_t num, uint8_t rotcount)
 {
 	return (num << rotcount) | (num >> (32 - rotcount));
 }

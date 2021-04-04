@@ -1,3 +1,6 @@
+#ifndef LOGGING_H
+#define LOGGING_H
+
 #include <string>
 
 class Logging {
@@ -6,3 +9,4 @@ public:
 private:
 	static std::string get_time(std::string type);
 };
+#endif

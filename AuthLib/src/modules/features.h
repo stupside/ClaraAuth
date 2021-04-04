@@ -1,5 +1,5 @@
-#ifndef MODULES_H
-#define MODULES_H
+#ifndef FEATURES_H
+#define FEATURES_H
 
 #include <map>
 #include <string>
@@ -218,7 +218,7 @@ namespace features {
 
 	class Stream {
 	public:
-		const std::string& descrypte(const std::string& secret) const;
+		const std::string& descrypt(const std::string& secret) const;
 		bool valid() const;
 
 		inline const std::string& iv() const { return this->m_iv; }
@@ -256,5 +256,4 @@ namespace features {
 		const std::string m_ist;
 	};
 }
-
 #endif

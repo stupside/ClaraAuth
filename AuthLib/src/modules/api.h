@@ -13,8 +13,8 @@ public:
     static const features::Response<features::Authenticate>* authenticate(const std::string& key, const std::string& hwid, const std::string& code, std::list<std::string> variables, const std::string& endpoint, int attempts);
     static const features::Response<features::Stream>& stream(const features::Authenticate& authenticate, const std::string& endpoint);
 private:
-    static const cpr::Response& post_req(std::string endpoint, cpr::Parameters parameters, cpr::Header headers, int attempts);
-    static const cpr::Response& get_req(std::string endpoint, cpr::Parameters parameters, cpr::Header headers, int attempts);
+    static cpr::Response post_req(std::string endpoint, cpr::Parameters parameters, cpr::Header headers, int attempts);
+    static cpr::Response get_req(std::string endpoint, cpr::Parameters parameters, cpr::Header headers, int attempts);
 };
 
 #endif

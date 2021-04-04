@@ -1,3 +1,6 @@
+#ifndef HARDWARE_H
+#define HARDWARE_H
+
 #include <iostream>
 
 namespace hardware {
@@ -8,3 +11,4 @@ namespace hardware {
     std::string physical_memory();
     std::string computer_name();
 }
+#endif

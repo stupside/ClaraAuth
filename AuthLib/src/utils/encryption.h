@@ -1,3 +1,6 @@
+#ifndef ENCRYPTION_H
+#define ENCRYPTION_H
+
 #include <string>
 
 class Encryption {
@@ -19,3 +22,4 @@ public:
 
 	static std::string pass(std::string pass);
 };
+#endif

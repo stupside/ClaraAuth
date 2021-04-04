@@ -1,6 +1,6 @@
 #include "token.h"
 
-#include "../exceptions/all_exceptions.h"
+#include "../exceptions/exceptions.h"
 
 #include "../helpers/hotp.h"
 
@@ -12,7 +12,7 @@
 #define AUTH_AUDIENCE "Tenet"
 #define AUTH_EXPIRY 60
 
-const std::string& token::verify(std::string& token, const std::string& code) {
+std::string token::verify(std::string& token, const std::string& code) {
 
 	std::string pass = Encryption::pass(code);
 
@@ -50,10 +50,10 @@ const std::string& token::verify(std::string& token, const std::string& code) {
 	std::string encrypted_datas = decoded.get_payload_claim("data").as_string();
 
 	std::string decrypted = Encryption::decrypt_routine(encrypted_iv, encrypted_datas, code, pass);
-	return decrypted; // DATA
+	return decrypted;
 }
 
-const std::string& token::generate(const json& object, const std::string& code)
+std::string token::generate(const json& object, const std::string& code)
 {
 	std::string encrypted_iv;
 	std::string pass;

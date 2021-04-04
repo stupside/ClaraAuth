@@ -4,7 +4,7 @@
 
 #include <nlohmann/json.hpp>
 
-#include "../exceptions/all_exceptions.h"
+#include "../exceptions/exceptions.h"
 
 #include "../utils/token.h"
 
@@ -31,10 +31,7 @@ const features::Response<features::Authenticate>* Api::authenticate(const std::s
 
 	if (response.status_code != 200)
 	{
-		return new features::Response<features::Authenticate>(
-			response.text.empty() ?
-				(response.reason.empty() ? "Something went wrong" : response.reason)
-				: response.text);
+		return new features::Response<features::Authenticate>(response.text);
 	}
 
 	std::string data;
@@ -91,7 +88,7 @@ const features::Response<features::Stream>& Api::stream(const features::Authenti
 	return features::Response<features::Stream>(stream);
 }
 
-const cpr::Response& Api::post_req(std::string endpoint, cpr::Parameters parameters, cpr::Header headers, int attempts)
+cpr::Response Api::post_req(std::string endpoint, cpr::Parameters parameters, cpr::Header headers, int attempts)
 {
 	if (attempts > MAX_ATTEMPTS)
 		attempts = MAX_ATTEMPTS;
@@ -125,7 +122,7 @@ const cpr::Response& Api::post_req(std::string endpoint, cpr::Parameters paramet
 	return req;
 }
 
-const cpr::Response& Api::get_req(std::string endpoint, cpr::Parameters parameters, cpr::Header headers, int attempts)
+cpr::Response Api::get_req(std::string endpoint, cpr::Parameters parameters, cpr::Header headers, int attempts)
 {
 	if (attempts > MAX_ATTEMPTS)
 		attempts = MAX_ATTEMPTS;

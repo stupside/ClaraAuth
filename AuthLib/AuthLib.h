@@ -181,11 +181,10 @@ namespace tenet {
 		Auth(const std::string& code);
 	
 	private:
-
-		static const int DEFAULT_ATTEMPS;
-
 		const std::string m_code;
 		const features::Response<features::Authenticate>* m_context;
+
+		static const int DEFAULT_ATTEMPS;
 	};
 }
 

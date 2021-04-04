@@ -4,7 +4,7 @@
 
 #include "src/utils/logging.h"
 
-#include "src/exceptions/all_exceptions.h"
+#include "src/exceptions/exceptions.h"
 
 #include "src/utils/encryption.h"
 

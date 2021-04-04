@@ -1,3 +1,6 @@
+#ifndef BYTES_H
+#define BYTES_H
+
 #define _CRT_SECURE_NO_WARNINGS
 #define WIN32_LEAN_AND_MEAN
 
@@ -340,3 +343,4 @@ namespace Bytes
 		~ByteStringDestructor() { clearByteString(m_bs); }
 	};
 }
+#endif

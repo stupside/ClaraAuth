@@ -1,11 +1,11 @@
 #include "features.h"
 
-#include "../exceptions/all_exceptions.h"
+#include "../exceptions/exceptions.h"
 
 #include "../utils/token.h"
 #include "../utils/encryption.h"
 
-const std::string& features::Stream::descrypte(const std::string& secret) const
+const std::string& features::Stream::descrypt(const std::string& secret) const
 {
 	if (!valid())
 		throw exceptions::GenericException("Invalid stream");
